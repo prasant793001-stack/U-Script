@@ -200,6 +200,55 @@ th{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--in
 .modal{background:var(--surface);border-radius:18px;padding:20px;width:min(760px,100%);max-height:85vh;display:grid;gap:12px;grid-template-rows:auto 1fr auto;border:2px solid var(--ink)}
 .modal textarea{height:100%;min-height:260px;font-family:var(--f-mono);font-size:.8rem}
 
+/* voice preview player: a fixed "studio console" look in both themes */
+.listen{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--orange);background:var(--orange);color:var(--on-accent);border-radius:999px;padding:5px 14px 5px 6px;font-weight:700;font-size:.85rem;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.listen:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
+.listen .ic{width:24px;height:24px;border-radius:50%;background:var(--on-accent);color:var(--orange);display:grid;place-items:center;flex:none}
+.listen .ic svg{width:12px;height:12px}
+.eq{display:none;align-items:flex-end;gap:2px;height:14px;width:24px;justify-content:center}
+.eq i{width:3px;height:6px;background:currentColor;border-radius:1px;animation:eq .9s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:-.3s}.eq i:nth-child(3){animation-delay:-.6s}
+@keyframes eq{0%,100%{height:3px}50%{height:14px}}
+.scene.is-playing{outline:3px solid var(--orange);outline-offset:-2px}
+.scene.is-paused{outline:2px dashed var(--orange);outline-offset:-2px}
+.scene.is-playing .listen .ic{display:none}.scene.is-playing .listen .eq{display:inline-flex}
+.tts{font-size:.85rem}.tts summary{cursor:pointer;color:var(--ink-2);font-weight:600}
+.tts div{margin-top:6px;padding:8px 10px;background:var(--surface-2);border-radius:8px;white-space:pre-wrap;line-height:1.7}
+.player{--pf:#FFF4E2;--pm:#BDB2DA;--pl:rgba(255,255,255,.1);position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:15;margin-top:18px;background:#1D1340;color:var(--pf);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:12px 14px;box-shadow:0 14px 40px -14px rgba(0,0,0,.6);display:grid;gap:10px;color-scheme:dark}
+.pl-main{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
+.pl-btns{display:flex;gap:6px;align-items:center}
+.pl-ic{width:38px;height:38px;border-radius:50%;border:0;background:var(--pl);color:var(--pf);display:grid;place-items:center;cursor:pointer;flex:none}
+.pl-ic:hover{background:rgba(255,255,255,.2)}
+.pl-play{width:52px;height:52px;border-radius:50%;border:0;background:linear-gradient(135deg,#FFC22E,#FF6B00);color:#1D1340;display:grid;place-items:center;cursor:pointer;flex:none;box-shadow:0 4px 14px -4px rgba(255,107,0,.7)}
+.pl-play:hover{filter:brightness(1.06)}
+.pl-info{min-width:0;display:grid;gap:5px}
+.pl-title{display:flex;gap:10px;align-items:baseline;min-width:0}
+.pl-title b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--f-display);font-size:1rem}
+.pl-voice{font-size:.74rem;color:var(--pm);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-now{font-size:.95rem;color:var(--pf);opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.4em}
+.pl-bar{height:4px;background:var(--pl);border-radius:999px;overflow:hidden}
+.pl-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FFC22E,#FF6B00);transition:width .25s}
+.pl-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--pl);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;color:var(--pm);font-weight:700;padding:6px 11px;border-radius:999px;cursor:pointer;font-size:.82rem}
+.seg button[aria-pressed="true"]{background:var(--pf);color:#1D1340}
+.pl-all{border:1.5px solid rgba(255,255,255,.3);background:transparent;color:var(--pf);border-radius:999px;padding:7px 13px;font-weight:700;cursor:pointer;font-size:.82rem}
+.pl-all:hover{background:var(--pl)}
+.pl-settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px;border-top:1px solid rgba(255,255,255,.14);padding-top:12px;max-height:55vh;overflow:auto}
+.pl-settings .f{color:var(--pf)}
+.pl-settings .f span{color:var(--pm);font-weight:600}
+.pl-settings select{background:rgba(255,255,255,.08);color:var(--pf);border-color:rgba(255,255,255,.22)}
+.pl-settings select option{background:#1D1340;color:#FFF4E2}
+.pl-settings input[type=range]{accent-color:#FF8A2A;width:100%}
+.pl-settings .checks label{color:var(--pf)}
+.pl-settings .checks input{accent-color:#FF8A2A}
+.pl-wide{grid-column:1/-1}
+.pl-note{font-size:.84rem;background:var(--pl);color:var(--pf);border-radius:10px;padding:10px 12px;line-height:1.5}
+.pl-note b{color:#FFC94A}
+.pl-chip{border:1.5px solid rgba(255,255,255,.3);background:transparent;color:var(--pf);border-radius:10px;padding:6px 12px;font-weight:700;cursor:pointer;font-size:.82rem}
+.pl-chip:hover{background:var(--pl)}
+@media (max-width:760px){.pl-main{grid-template-columns:auto minmax(0,1fr)}.pl-right{grid-column:1/-1;justify-content:space-between}.pl-settings{grid-template-columns:1fr}}
+@media (max-width:420px){.pl-ic{width:34px;height:34px}.pl-play{width:46px;height:46px}#pl-stop{display:none}}
 @media (max-width:900px){
   .hero{grid-template-columns:1fr;padding-block:28px 16px}
   .page-card{transform:none;max-width:520px}
@@ -438,7 +487,7 @@ th{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--in
 <section id="v-board" class="wrap view" hidden>
   <div class="view-head">
     <div><p class="eyebrow">Scene Board</p><h2 id="board-title">Paste the AI's answer</h2></div>
-    <div class="row"><button class="btn small ghost" id="load-example">Load example</button><button class="btn small ghost" id="clear-board">Clear</button></div>
+    <div class="row"><button class="btn small ghost" id="load-example-hi">Hindi example</button><button class="btn small ghost" id="load-example">English example</button><button class="btn small ghost" id="clear-board">Clear</button></div>
   </div>
   <div class="panel" id="paste-panel">
     <label class="f" for="paste">Paste the full reply (the JSON block). Extra text around it is fine.</label>
@@ -446,6 +495,41 @@ th{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--in
     <div class="row"><button class="btn primary" id="build">Build scenes</button><span class="muted" id="parse-msg" style="font-size:.88rem"></span></div>
   </div>
   <div id="board-out"></div>
+  <div class="player" id="player" hidden aria-label="Voice preview player">
+    <div class="pl-main">
+      <div class="pl-btns">
+        <button class="pl-ic" id="pl-prev" aria-label="Previous scene"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h2v14H6zM9.5 12 19 5.5v13z"/></svg></button>
+        <button class="pl-play" id="pl-play" aria-label="Play"></button>
+        <button class="pl-ic" id="pl-next" aria-label="Next scene"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 5h2v14h-2zM14.5 12 5 18.5v-13z"/></svg></button>
+        <button class="pl-ic" id="pl-stop" aria-label="Stop"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+      </div>
+      <div class="pl-info">
+        <div class="pl-title"><b id="pl-scene">Voice preview</b><span class="pl-voice" id="pl-voice"></span></div>
+        <div class="pl-now" id="pl-now" dir="auto"></div>
+        <div class="pl-bar"><i id="pl-prog"></i></div>
+      </div>
+      <div class="pl-right">
+        <div class="seg" id="pl-modes" role="group" aria-label="Voice language">
+          <button data-mode="auto" aria-pressed="false">Auto</button><button data-mode="hi" aria-pressed="false" lang="hi">हिन्दी</button><button data-mode="en" aria-pressed="false">English</button>
+        </div>
+        <button class="pl-all" id="pl-all">Play all</button>
+        <button class="pl-ic" id="pl-gear" aria-expanded="false" aria-controls="pl-settings" aria-label="Voice settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
+      </div>
+    </div>
+    <div class="pl-settings" id="pl-settings" hidden>
+      <label class="f">Hindi voice<select id="pl-hi"></select></label>
+      <label class="f">English voice<select id="pl-en"></select></label>
+      <div class="checks" style="flex-direction:column;align-items:flex-start;gap:8px;padding-top:4px">
+        <label><input type="checkbox" id="pl-follow"> Follow delivery notes (slow, deep, whisper, pause after…)</label>
+        <label><input type="checkbox" id="pl-auto"> Continue to the next scene</label>
+      </div>
+      <label class="f">Speed <span id="pl-rate-v"></span><input type="range" id="pl-rate" min="0.6" max="1.4" step="0.05"></label>
+      <label class="f">Tone (deeper to brighter) <span id="pl-pitch-v"></span><input type="range" id="pl-pitch" min="0.6" max="1.4" step="0.05"></label>
+      <label class="f">Pause length <span id="pl-pause-v"></span><input type="range" id="pl-pause" min="0.3" max="2.5" step="0.1"></label>
+      <div class="row pl-wide"><button class="pl-chip" id="pl-test-hi" lang="hi">Test Hindi voice</button><button class="pl-chip" id="pl-test-en">Test English voice</button><button class="pl-chip" id="pl-reset">Reset settings</button></div>
+      <p class="pl-note pl-wide" id="pl-hint"></p>
+    </div>
+  </div>
 </section>
 
 <!-- VOICE LAB -->
@@ -717,6 +801,29 @@ const EXAMPLE = {"project":{"title":"Apollo 13: The Problem 320,000 km From Home
 "youtube":{"description":"How Apollo 13's crew survived an explosion on the way to the Moon.","chapters":["00:00 The Bang","00:14 Launch","00:28 The Lifeboat","00:46 Splashdown"],"tags":["Apollo 13","NASA","space history","survival story"]},
 "thumbnail_ideas":["Astronaut helmet reflecting a red warning light, text: 'WE'VE HAD A PROBLEM'"]};
 
+const EXAMPLE_HI = (()=>{
+  const e = JSON.parse(JSON.stringify(EXAMPLE));
+  Object.assign(e.project, {title:"Apollo 13: Dharti se 3 lakh km door", language:"Hinglish", script:"Roman (Latin letters)",
+    logline:"Chaand ke raaste mein ek oxygen tank phat jaata hai, aur teen astronauts apne lunar module ko lifeboat bana lete hain.",
+    hook_line:"13 April 1970. Dharti se teen lakh kilometre se bhi zyada door, ek dhamaka."});
+  const HI = [
+    ["13 April 1970. Dharti se teen lakh kilometre se bhi zyada door, teen astronauts ko ek dhamaka sunai deta hai... Phir radio par ek awaaz aati hai: Houston, we've had a problem.",
+     "तेरह अप्रैल, उन्नीस सौ सत्तर। [pause] धरती से तीन लाख किलोमीटर से भी ज़्यादा दूर, तीन astronauts को एक धमाका सुनाई देता है... फिर रेडियो पर एक आवाज़ आती है... [pause] Houston, we've had a problem.",
+     "low and slow; pause after 'धमाका सुनाई देता है'"],
+    ["Do din pehle, Apollo 13 ne Jim Lovell, Jack Swigert aur Fred Haise ke saath udaan bhari thi. Manzil thi... Chaand.",
+     "दो दिन पहले, अपोलो थर्टीन ने जिम लवेल, जैक स्विगर्ट और फ्रेड हेज़ के साथ उड़ान भरी थी। मंज़िल थी... [pause] चाँद।",
+     "warmer, a touch of pride"],
+    ["Main spacecraft fail ho raha tha. Teenon log lunar module Aquarius mein chale gaye, jo sirf do logon aur do dinon ke liye bana tha. Jab andar ki hawa zehreeli hone lagi, Earth par engineers ne unhe sikhaya ki square filter ko round socket mein kaise fit karein.",
+     "मेन स्पेसक्राफ्ट फेल हो रहा था। तीनों लोग लूनर मॉड्यूल, Aquarius, में चले गए... जो सिर्फ़ दो लोगों और दो दिनों के लिए बना था। जब अंदर की हवा ज़हरीली होने लगी, तो धरती पर इंजीनियरों ने उन्हें सिखाया... कि square filter को round socket में कैसे फिट करें।",
+     "faster, urgent"],
+    ["17 April ko, Pacific Ocean ke upar teen parachute khule. Apollo 13 kabhi Chaand tak nahi pahuncha... lekin teenon astronauts zinda ghar laut aaye.",
+     "सत्रह अप्रैल को, प्रशांत महासागर के ऊपर तीन पैराशूट खुले। [pause] अपोलो थर्टीन कभी चाँद तक नहीं पहुँचा... लेकिन तीनों astronauts ज़िंदा घर लौट आए।",
+     "slow, warm release; let the last line breathe"]
+  ];
+  e.scenes.forEach((s,i)=>{ s.voiceover=HI[i][0]; s.tts_text=HI[i][1]; s.delivery=HI[i][2]; });
+  return e;
+})();
+
 /* ============ STATE & STORAGE ============ */
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -775,6 +882,280 @@ function download(filename, text){
 const slug = s => (s||"script").toLowerCase().replace(/[^a-z0-9ऀ-ॿ؀-ۿ]+/g,"-").replace(/^-|-$/g,"").slice(0,48) || "script";
 const fmt = sec => { sec=Math.max(0,Math.round(sec)); return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0"); };
 
+/* ============ VOICE PREVIEW PLAYER ============
+   Free text-to-speech built into the browser (Web Speech API).
+   - One global player: starting any scene stops whatever was playing.
+   - Text is split into sentences so pauses are real silences we control
+     ("..." short, "[pause]" long, sentence ends, line breaks, dashes).
+   - Delivery notes nudge speed / tone / volume, and "pause after 'words'" inserts a pause.
+   - Hindi: uses the scene's Devanagari tts_text when present; otherwise Roman Hindi
+     is converted to Devanagari (Google Input Tools) so the Hindi voice sounds natural. */
+const ICON = {
+  play:'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.2-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
+  pause:'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+};
+const TTS = (()=>{
+  const synth = ("speechSynthesis" in window) ? window.speechSynthesis : null;
+  const DEF = {mode:"auto", hi:"", en:"", rate:1, pitch:1, pause:1, follow:true, next:false};
+  const S = Object.assign({}, DEF, ls.get("tts", {}));
+  const save = ()=>ls.set("tts", S);
+  const DEV=/[ऀ-ॿ]/, ARAB=/[؀-ۿ]/;
+  let voices=[], job=null, chunks=[], idx=0, state="idle", token=0, timer=null, keep=null, curVoice=null, lastScene=-1, warned=false, tFails=0;
+  const tcache={};
+
+  /* ---- voices ---- */
+  const norm = l => String(l||"").replace("_","-").toLowerCase();
+  function score(v){
+    const n=v.name.toLowerCase(); let s=0;
+    if(/natural|neural/.test(n)) s+=60;            // Edge: Swara / Madhur / Neerja (Natural)
+    if(/google/.test(n)) s+=40;                    // Chrome: Google हिन्दी, Google UK English…
+    if(/premium|enhanced|siri/.test(n)) s+=30;     // Apple
+    if(/online/.test(n)) s+=10;
+    if(/-in$/.test(norm(v.lang))) s+=8;            // Indian accent first
+    return s;
+  }
+  const byLang = code => voices.filter(v=>norm(v.lang).split("-")[0]===code).sort((a,b)=>score(b)-score(a));
+  function voiceFor(code){ const list=byLang(code); if(!list.length) return null; return (S[code] && list.find(v=>v.name===S[code])) || list[0]; }
+  const short = n => String(n).replace(/^Microsoft\s+/,"").replace(/\s+Online/,"").replace(/\s+-\s+.*$/,"").trim();
+  function loadVoices(){ if(!synth) return; const v=synth.getVoices(); if(v.length){ voices=v; fillVoiceLists(); paint(); } }
+  function fillVoiceLists(){
+    [["hi","#pl-hi"],["en","#pl-en"]].forEach(([code,sel])=>{
+      let list=byLang(code);
+      if(code==="en") list=list.filter(v=>/-(in|us|gb|au|ie|ca|nz|za)$/.test(norm(v.lang))).slice(0,30);
+      const el=$(sel); if(!el) return;
+      el.innerHTML = list.length
+        ? `<option value="">Best available (${esc(short(list[0].name))})</option>`+list.map(v=>`<option value="${esc(v.name)}"${v.name===S[code]?" selected":""}>${esc(short(v.name))} · ${esc(v.lang)}</option>`).join("")
+        : `<option value="">No ${code==="hi"?"Hindi":"English"} voice on this device</option>`;
+    });
+    hint();
+  }
+  function hint(){
+    const el=$("#pl-hint"); if(!el) return;
+    if(!synth){ el.innerHTML="This browser can't speak text. Open U-Script in <b>Microsoft Edge</b> or <b>Chrome</b>."; return; }
+    const h=voiceFor("hi");
+    if(!h) el.innerHTML="No Hindi voice on this device yet. Free fixes: open U-Script in <b>Microsoft Edge</b> (Swara and Madhur Natural voices sound the most human) or <b>Chrome</b> (Google हिन्दी). On Android: Settings → Text-to-speech → Google → install Hindi.";
+    else if(score(h)<40) el.innerHTML=`Hindi voice: ${esc(short(h.name))}. For a more natural Hindi voice, open U-Script in <b>Microsoft Edge</b> (Swara / Madhur Natural) or <b>Chrome</b> (Google हिन्दी).`;
+    else el.innerHTML=`Hindi voice: <b>${esc(short(h.name))}</b>. This preview guides pacing, pauses and tone. Record the final voiceover yourself or in ComfyUI.`;
+  }
+
+  /* ---- text → timed chunks ---- */
+  function clean(t){ return String(t||"").replace(/\*\*|__|[*#_~`]/g,"").replace(/[ \t]+/g," ").replace(/\s*\n\s*/g,"\n").trim(); }
+  function toChunks(text, delivery){
+    text = clean(text);
+    if(S.follow && delivery){
+      const re=/pause\s+(after|before)\s+['"‘“]([^'"’”]{2,80})['"’”]/gi; let m;
+      while((m=re.exec(delivery))){
+        const at0=text.toLowerCase().indexOf(m[2].toLowerCase()); if(at0<0) continue;
+        const at = m[1].toLowerCase()==="before" ? at0 : at0+m[2].length;
+        text = text.slice(0,at)+" [pause] "+text.slice(at);
+      }
+    }
+    const out=[];
+    const push=(seg,gap)=>{
+      seg=seg.replace(/\s+/g," ").trim();
+      if(!seg || !/[\p{L}\p{N}]/u.test(seg)){ if(out.length) out[out.length-1].gap=Math.max(out[out.length-1].gap,gap); return; }
+      if(seg.length>200){ // long sentence: split at commas so the voice never runs on (and Chrome never cuts off)
+        const parts=seg.split(/(?<=[,;:،])\s+/); let buf="";
+        parts.forEach((p,k)=>{ if((buf+" "+p).trim().length>160 && buf){ out.push({text:buf.trim(),gap:160}); buf=p; } else buf=(buf+" "+p).trim(); if(k===parts.length-1 && buf) out.push({text:buf,gap}); });
+      } else out.push({text:seg,gap});
+    };
+    const re=/(\[(?:long\s+)?pause\]|\((?:long\s+)?pause\)|\.{3,}|…|\s[—–]\s|—|\n+|[.!?।॥]+["”’)\]]*(?=\s|$))/gi;
+    let last=0, m;
+    while((m=re.exec(text))){
+      const tok=m[0]; let seg=text.slice(last,m.index), gap;
+      if(/pause/i.test(tok)) gap=/long/i.test(tok)?1500:950;
+      else if(/\.{3}|…/.test(tok)) gap=600;
+      else if(/[—–]/.test(tok)) gap=320;
+      else if(/\n/.test(tok)) gap=700;
+      else { seg+=tok.trim(); gap=/[!?]/.test(tok)?420:360; }
+      push(seg,gap); last=m.index+tok.length;
+    }
+    push(text.slice(last), 0);
+    return out;
+  }
+  function mood(note){
+    const n=String(note||"").toLowerCase(); const m={rate:1,pitch:1,volume:1};
+    if(!S.follow||!n) return m;
+    if(/\b(very slow|slowly|slow|deliberate|measured|breathe|calm)\b/.test(n)) m.rate*=0.88;
+    if(/\b(fast|faster|quick|urgent|rapid|energetic|punchy|excited)\b/.test(n)) m.rate*=1.1;
+    if(/\b(low|lower|deep|deeper|grave|dark|serious|heavy|ominous)\b/.test(n)) m.pitch*=0.88;
+    if(/\b(bright|excited|rising|hopeful|warm|warmer|pride)\b/.test(n)) m.pitch*=1.05;
+    if(/\b(whisper|whispered|soft|softly|quiet|hushed|intimate)\b/.test(n)){ m.volume=0.7; m.rate*=0.92; m.pitch*=0.95; }
+    return m;
+  }
+
+  /* ---- Roman Hindi → Devanagari (free, best effort) ---- */
+  async function translitOne(part){
+    const core=part.replace(/[^\p{L}\p{N}\s']/gu," ").replace(/\s+/g," ").trim();
+    if(!core) return part;
+    if(tcache[core]) return tcache[core];
+    const ctl=new AbortController(); const to=setTimeout(()=>ctl.abort(),5000);
+    try{
+      const r=await fetch("https://inputtools.google.com/request?itc=hi-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8&app=uscript&text="+encodeURIComponent(core),{signal:ctl.signal});
+      const j=await r.json(); clearTimeout(to);
+      const out=j&&j[0]==="SUCCESS"&&j[1]&&j[1][0]&&j[1][0][1]&&j[1][0][1][0];
+      if(!out||!DEV.test(out)) throw new Error("empty");
+      return tcache[core]=out;
+    }catch(e){ clearTimeout(to); tFails++; return null; }
+  }
+  async function translit(text){
+    if(tFails>=3) return null;
+    const end=(text.trim().match(/[.!?।]+$/)||[""])[0].replace(/\./g,"।");
+    const parts=text.replace(/[.!?।]+$/,"").split(/,\s*/);
+    const res=await Promise.all(parts.map(translitOne));
+    if(res.some(r=>r===null)) return null;
+    return res.join(", ")+end;
+  }
+
+  /* ---- playback ---- */
+  function langOf(text){
+    if(DEV.test(text)) return "hi";
+    if(ARAB.test(text)) return byLang("ur").length?"ur":"hi";
+    if(S.mode==="hi") return "hi";
+    if(S.mode==="en") return "en";
+    return job?job.base:"en";
+  }
+  async function start(j, from=0){
+    if(!synth){ toast("Voice preview needs Chrome, Edge or Safari"); return; }
+    const t=++token; synth.cancel(); clearTimeout(timer);
+    if(!voices.length) voices=synth.getVoices();
+    job=j; idx=from; chunks=toChunks(j.text, j.delivery);
+    if(!chunks.length){ state="idle"; paint(); toast("This scene has no voiceover text"); return; }
+    if(j.base==="hi" && S.mode!=="en" && !j.native){
+      state="loading"; paint();
+      let failed=false;
+      await Promise.all(chunks.map(async c=>{ if(DEV.test(c.text)||ARAB.test(c.text)) return; const dv=await translit(c.text); if(dv) c.text=dv; else failed=true; }));
+      if(t!==token) return;
+      if(failed && !warned){ warned=true; toast("Couldn't convert to Hindi script, so the Roman text is read as-is. New scripts include Hindi voice text automatically."); }
+    }
+    state="playing"; paint(); speak(t);
+  }
+  function speak(t){
+    if(t!==token) return;
+    if(idx>=chunks.length) return done(t);
+    const c=chunks[idx], code=langOf(c.text), v=voiceFor(code), m=mood(job.delivery);
+    const u=new SpeechSynthesisUtterance(c.text);
+    if(v){ u.voice=v; u.lang=v.lang; } else u.lang = code==="hi"?"hi-IN":code==="ur"?"ur-PK":"en-IN";
+    u.rate=Math.min(2,Math.max(.5,S.rate*m.rate));
+    u.pitch=Math.min(2,Math.max(0,S.pitch*m.pitch));
+    u.volume=m.volume;
+    u.onend=()=>{ if(t!==token) return; idx++; paint(); timer=setTimeout(()=>speak(t), Math.round(c.gap*S.pause)); };
+    u.onerror=e=>{
+      if(t!==token) return;
+      if(e.error==="interrupted"||e.error==="canceled") return;
+      if(e.error==="not-allowed"){ state="idle"; paint(); toast("Press play again to allow audio"); return; }
+      idx++; timer=setTimeout(()=>speak(t),80);
+    };
+    keep=u; curVoice=v; paint();
+    synth.speak(u);
+  }
+  function done(t){
+    const j=job, d=board&&board.data;
+    if(j && j.scene!=null && (S.next||j.all) && d && j.scene+1<d.scenes.length){
+      timer=setTimeout(()=>{ if(t===token) playScene(j.scene+1, j.all); }, Math.round(800*S.pause));
+      return;
+    }
+    state="idle"; paint();
+  }
+  function playScene(i, all=false){
+    const d=board&&board.data; if(!d||!d.scenes[i]) return;
+    const s=d.scenes[i], english=/^english$/i.test(String(d.project.language||"").trim());
+    const useTts=!!(s.tts_text && String(s.tts_text).trim() && S.mode!=="en");
+    lastScene=i;
+    start({scene:i, all, label:`Scene ${String(s.id).padStart(2,"0")} · ${s.title||""}`, text:useTts?s.tts_text:(s.voiceover||""), delivery:s.delivery||"", base:english?"en":"hi", native:useTts});
+    const el=document.querySelector(`#board-out .scene[data-i="${i}"]`);
+    if(el && all){ const r=el.getBoundingClientRect(); if(r.top<70||r.bottom>innerHeight-140) el.scrollIntoView({behavior:"smooth",block:"center"}); }
+  }
+  function pause(){ if(state!=="playing") return; token++; synth.cancel(); clearTimeout(timer); state="paused"; paint(); }
+  function resume(){ if(state!=="paused") return; const t=++token; state="playing"; paint(); speak(t); }
+  function stop(){ token++; if(synth) synth.cancel(); clearTimeout(timer); state="idle"; idx=0; chunks=[]; job=null; paint(); }
+  function toggleScene(i){
+    if(job && job.scene===i){
+      if(state==="playing") return pause();
+      if(state==="paused") return resume();
+      if(state==="loading") return stop();
+    }
+    playScene(i,false);
+  }
+  function main(){
+    if(state==="playing") return pause();
+    if(state==="paused") return resume();
+    if(state==="loading") return stop();
+    if(job && job.scene==null) return start(job);
+    playScene(lastScene>=0?lastScene:0, false);
+  }
+  function step(dir){
+    const d=board&&board.data; if(!d) return;
+    const cur = job&&job.scene!=null ? job.scene : lastScene;
+    playScene(Math.min(d.scenes.length-1, Math.max(0, (cur<0?0:cur+dir))), job?job.all:false);
+  }
+  const TEST={hi:"नमस्ते दोस्तों... आज की कहानी आपके रोंगटे खड़े कर देगी। [pause] तो चलिए, शुरू करते हैं।", en:"Hello friends... today's story will give you goosebumps. [pause] So, let's begin."};
+  function test(code){ start({scene:null, all:false, label:code==="hi"?"Voice test · हिन्दी":"Voice test · English", text:TEST[code], delivery:"", base:code, native:true}); }
+
+  /* ---- UI ---- */
+  function paint(){
+    if(!$("#player")) return;
+    const busy = state==="playing"||state==="loading";
+    $("#pl-play").innerHTML = busy ? ICON.pause : ICON.play;
+    $("#pl-play").setAttribute("aria-label", busy?"Pause":"Play");
+    $("#pl-scene").textContent = job ? job.label : "Voice preview";
+    const cur = chunks[Math.min(idx, chunks.length-1)];
+    $("#pl-now").textContent =
+      state==="loading" ? "Preparing the Hindi voice text…" :
+      !job ? "Press Listen on any scene to hear how the voiceover should sound." :
+      (state==="idle" && idx>=chunks.length) ? "Finished. Press play to hear it again." :
+      state==="paused" ? "Paused · "+(cur?cur.text:"") : (cur?cur.text:"");
+    $("#pl-prog").style.width = chunks.length ? Math.round(Math.min(idx,chunks.length)/chunks.length*100)+"%" : "0%";
+    $("#pl-voice").textContent = state==="playing"&&curVoice ? short(curVoice.name) : "";
+    $$("#pl-modes button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.mode===S.mode)));
+    $$("#board-out .scene").forEach(el=>{
+      const i=+el.dataset.i, on=!!(job&&job.scene===i);
+      el.classList.toggle("is-playing", on&&busy);
+      el.classList.toggle("is-paused", on&&state==="paused");
+      const b=el.querySelector("[data-listen]"); if(!b) return;
+      b.querySelector(".lt").textContent = !on ? "Listen" : state==="playing" ? "Pause" : state==="paused" ? "Resume" : state==="loading" ? "Preparing…" : "Listen";
+      b.querySelector(".ic").innerHTML = on&&state==="paused" ? ICON.play : ICON.play;
+      b.setAttribute("aria-pressed", String(on&&busy));
+    });
+  }
+  function syncControls(){
+    [["rate","pl-rate",v=>v.toFixed(2)+"×"],["pitch","pl-pitch",v=>v<0.97?"deeper":v>1.03?"brighter":"natural"],["pause","pl-pause",v=>v.toFixed(1)+"×"]].forEach(([k,id,f])=>{
+      $("#"+id).value=S[k]; $("#"+id+"-v").textContent=f(+S[k]);
+    });
+    $("#pl-follow").checked=S.follow; $("#pl-auto").checked=S.next;
+  }
+  function init(){
+    $("#pl-play").onclick=main; $("#pl-stop").onclick=stop;
+    $("#pl-prev").onclick=()=>step(-1); $("#pl-next").onclick=()=>step(1);
+    $("#pl-all").onclick=()=>playScene(0,true);
+    $("#pl-gear").onclick=()=>{ const s=$("#pl-settings"); s.hidden=!s.hidden; $("#pl-gear").setAttribute("aria-expanded",String(!s.hidden)); if(!s.hidden) loadVoices(); };
+    $$("#pl-modes button").forEach(b=>b.onclick=()=>{ S.mode=b.dataset.mode; save(); paint(); if(job&&job.scene!=null&&state!=="idle") playScene(job.scene, job.all); });
+    $("#pl-hi").onchange=e=>{ S.hi=e.target.value; save(); hint(); };
+    $("#pl-en").onchange=e=>{ S.en=e.target.value; save(); };
+    [["rate","pl-rate"],["pitch","pl-pitch"],["pause","pl-pause"]].forEach(([k,id])=>$("#"+id).addEventListener("input",e=>{ S[k]=+e.target.value; save(); syncControls(); }));
+    $("#pl-follow").onchange=e=>{ S.follow=e.target.checked; save(); };
+    $("#pl-auto").onchange=e=>{ S.next=e.target.checked; save(); };
+    $("#pl-test-hi").onclick=()=>test("hi");
+    $("#pl-test-en").onclick=()=>test("en");
+    $("#pl-reset").onclick=()=>{ Object.assign(S,DEF); save(); syncControls(); fillVoiceLists(); paint(); toast("Voice settings reset"); };
+    syncControls(); paint();
+    if(synth){
+      loadVoices();
+      if(synth.addEventListener) synth.addEventListener("voiceschanged", loadVoices); else synth.onvoiceschanged=loadVoices;
+      setTimeout(loadVoices,700); setTimeout(loadVoices,2500);
+      addEventListener("pagehide", ()=>synth.cancel());
+    } else hint();
+  }
+  function attach(){
+    $("#player").hidden=false;
+    $$("#board-out [data-listen]").forEach(b=>b.onclick=()=>toggleScene(+b.dataset.listen));
+    paint();
+  }
+  function detach(){ stop(); $("#player").hidden=true; }
+  init();
+  return {attach, detach, stop, playScene, toggleScene, _state:()=>({state,idx,chunks,job})};
+})();
+
 /* ============ ROUTING ============ */
 const VIEWS=["landing","studio","board","voice","library"];
 function go(v){
@@ -782,6 +1163,7 @@ function go(v){
   VIEWS.forEach(x=>{ $("#v-"+x).hidden = x!==v; });
   $$("#nav button").forEach(b=>b.setAttribute("aria-current", b.dataset.go===v?"page":"false"));
   $("#nav").hidden = !profile; $("#userchip").hidden = !profile;
+  if(v!=="board") TTS.stop();
   if(v==="voice") renderVoice();
   if(v==="library") renderLibrary();
   if(v==="board") renderBoard();
@@ -1007,7 +1389,10 @@ function buildPrompt(){
   L.push(LANG_RULES[b.lang]);
   L.push(`- Write ALL voiceover and on-screen text in ${b.lang}, ${b.script}. Write numbers and dates the way the narrator would say them out loud.`);
   L.push("- Keep proper names, places and dates exactly accurate; spell names consistently.");
-  L.push(`- Narrator: ${b.narrator}. Voice: ${b.voicestyle}. Add delivery notes (pace, pauses, emphasis, whisper/rise) for each scene.`);
+  L.push(`- Narrator: ${b.narrator}. Voice: ${b.voicestyle}. Add delivery notes for each scene in English, using these words where they fit so the preview player can follow them: slow, fast, urgent, low, deep, whisper, soft, warm, bright. Mark exact pauses as: pause after 'exact words from tts_text'.`);
+  L.push(b.lang==="English"
+    ? `- "tts_text": the same voiceover prepared for a text-to-speech preview. Numbers and dates written as spoken words. Mark pauses with "..." (short) and "[pause]" (long, dramatic). No stage directions inside it.`
+    : `- "tts_text": the same voiceover prepared for a Hindi text-to-speech preview voice. Write it in Devanagari script (Hindi/Urdu words in Devanagari; English words the narrator says in English can stay in Latin letters). Numbers and dates written as spoken words. Mark pauses with "..." (short) and "[pause]" (long, dramatic). No stage directions inside it.`);
   if(useDna){
     L.push("");
     L.push(`### Voice DNA of ${profile.name} (${b.lang}). Follow this closely; the script must sound like this person.`);
@@ -1039,7 +1424,7 @@ function buildPrompt(){
     truth_ledger:[{id:"F1",claim:"",status:"verified | disputed | needs_verification | legend",sources:[{name:"",url:"only real URLs you actually used"}]}],
     characters:b.extras.includes("bible")?[{name:"",visual_lock:""}]:[],
     music_palette:[{cue:"M1",mood:"",style:"",bpm:0,where:"Scenes 1–3"}],
-    scenes:[{id:1,act:"Hook",title:"",start:"00:00",duration_sec:0,voiceover:"",delivery:"",on_screen_text:"",
+    scenes:[{id:1,act:"Hook",title:"",start:"00:00",duration_sec:0,voiceover:"",tts_text:"",delivery:"",on_screen_text:"",
       visual:Object.assign({description:"",comfyui_prompt:"",negative_prompt:"",shot:"wide | medium | close-up | extreme close-up | aerial",camera:""},b.extras.includes("broll")?{motion_prompt:""}:{}),
       sfx:[""],music:{cue:"M1",action:""},transition:"",fact_ids:["F1"],dramatized:false}],
     end_card:{cta:"",next_tease:""}
@@ -1112,17 +1497,19 @@ function buildFromPaste(){
   try{
     const d=normalize(parseResult($("#paste").value));
     if(!d.scenes.length) throw new Error("Found JSON, but it has no \"scenes\" list.");
-    board={raw:$("#paste").value, data:d, example:false}; ls.set("board",board);
+    TTS.stop(); board={raw:$("#paste").value, data:d, example:false}; ls.set("board",board);
     msg.textContent=""; renderBoard(); toast(d.scenes.length+" scenes built");
   }catch(e){ msg.innerHTML=`<span style="color:var(--bad)">${esc(e.message)}</span>`; }
 }
 $("#build").onclick=buildFromPaste;
-$("#load-example").onclick=()=>{ board={raw:JSON.stringify(EXAMPLE,null,2), data:normalize(JSON.parse(JSON.stringify(EXAMPLE))), example:true}; $("#paste").value=board.raw; ls.set("board",board); renderBoard(); };
-$("#clear-board").onclick=()=>{ board=null; ls.set("board",null); $("#paste").value=""; renderBoard(); };
+function loadExample(ex){ TTS.stop(); board={raw:JSON.stringify(ex,null,2), data:normalize(JSON.parse(JSON.stringify(ex))), example:true}; $("#paste").value=board.raw; ls.set("board",board); renderBoard(); }
+$("#load-example").onclick=()=>loadExample(EXAMPLE);
+$("#load-example-hi").onclick=()=>loadExample(EXAMPLE_HI);
+$("#clear-board").onclick=()=>{ TTS.stop(); board=null; ls.set("board",null); $("#paste").value=""; renderBoard(); };
 
 function renderBoard(){
   const out=$("#board-out");
-  if(!board){ $("#board-title").textContent="Paste the AI's answer"; $("#paste-panel").hidden=false;
+  if(!board){ TTS.detach(); $("#board-title").textContent="Paste the AI's answer"; $("#paste-panel").hidden=false;
     out.innerHTML=`<div class="empty" style="margin-top:16px"><h3>No scenes yet</h3><p class="muted">Paste the JSON your AI returned, or load the example to see how a finished board looks.</p></div>`; return; }
   const d=board.data, p=d.project, rtl = /urdu \(nastaliq\)|^urdu$/i.test(p.script||"") || (p.language==="Urdu" && !/roman/i.test(p.script||""));
   $("#board-title").textContent = p.title || "Untitled script";
@@ -1130,7 +1517,7 @@ function renderBoard(){
   const counts={}; d.truth_ledger.forEach(f=>{ counts[f.status]=(counts[f.status]||0)+1; });
   const unverified = (counts.needs_verification||0)+(counts.disputed||0);
   out.innerHTML = `
-  ${board.example?`<p class="note" style="margin-bottom:14px">Example board (Apollo 13, 60 seconds). Paste your own AI result above to replace it.</p>`:""}
+  ${board.example?`<p class="note" style="margin-bottom:14px">Example board (Apollo 13, 60 seconds). Press <b>Listen</b> on any scene to hear the pacing. Paste your own AI result above to replace it.</p>`:""}
   <div class="summary">
     <div class="panel">
       <p class="eyebrow">${esc(p.genre||"")} · ${esc(p.language||"")} ${p.script?"· "+esc(p.script):""} · ${esc(p.aspect_ratio||"")}</p>
@@ -1169,12 +1556,13 @@ function renderBoard(){
   </div>`:""}
 
   <div class="scenes" style="margin-top:16px">
-  ${d.scenes.map((s,i)=>`<article class="scene">
+  ${d.scenes.map((s,i)=>`<article class="scene" data-i="${i}">
     <div class="tc"><b>${String(s.id).padStart(2,"0")}</b><span>${esc(s.start)}</span><span>${s.duration_sec?esc(s.duration_sec)+"s":""}</span><em>${esc(s.act||"")}</em></div>
     <div class="col">
-      <div class="scene-h"><h3>${esc(s.title||"Scene "+s.id)}</h3><button class="btn small ghost" data-copy="vo" data-i="${i}">Copy VO</button></div>
+      <div class="scene-h"><h3>${esc(s.title||"Scene "+s.id)}</h3><div class="row" style="gap:6px"><button class="listen" data-listen="${i}" aria-pressed="false"><span class="ic">${ICON.play}</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="lt">Listen</span></button><button class="btn small ghost" data-copy="vo" data-i="${i}">Copy VO</button></div></div>
       <span class="lbl vo">Voiceover</span>
       <div class="vo-text" ${rtl?'dir="rtl"':""}>${esc(s.voiceover)}</div>
+      ${s.tts_text&&s.tts_text.trim()!==String(s.voiceover||"").trim()?`<details class="tts"><summary>Voice text used by the player</summary><div dir="auto">${esc(s.tts_text)}</div></details>`:""}
       ${s.delivery?`<div class="delivery">${esc(s.delivery)}</div>`:""}
       ${s.on_screen_text?`<div><span class="lbl">On screen</span><div style="font-weight:700">${esc(s.on_screen_text)}</div></div>`:""}
       <div class="tags">${(s.fact_ids||[]).map(f=>`<span class="tag mono">${esc(f)}</span>`).join("")}${s.dramatized?`<span class="pill dramatized">dramatized</span>`:""}</div>
@@ -1198,6 +1586,7 @@ function renderBoard(){
     ${d.end_card?`<p class="muted">End card: ${esc(d.end_card.cta||"")} ${d.end_card.next_tease?"· "+esc(d.end_card.next_tease):""}</p>`:""}
   </div>`:""}`;
   out.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>exportFile(b.dataset.x));
+  TTS.attach();
   out.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{ const s=d.scenes[+b.dataset.i]; const t=b.dataset.copy==="vo"?s.voiceover:s.visual.comfyui_prompt; if(await copyText(t||"")) toast("Copied"); else showModal("Scene "+s.id, t||""); });
   $("#save-board").onclick=async()=>{
     const existing = currentId && projects[currentId];

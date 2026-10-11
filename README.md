@@ -12,6 +12,7 @@ Everything here runs on free tiers: GitHub Pages for hosting, Firebase Spark for
 - **Truth Lock**: for real-events stories, the prompt requires research before writing, 2–3 independent sources per fact, a truth ledger, no invented quotes, and cutting anything unverifiable.
 - **One-tap AI launch**: copies the prompt and opens Claude, ChatGPT or Gemini.
 - **Scene Board**: turns the AI's JSON into scene cards. Downloads: voiceover, ComfyUI visuals (with negative and motion prompts), music, SFX, full script, project JSON.
+- **Voice preview player**: every scene has a **Listen** button, and starting one scene stops the other. Hindi and English voices; pauses (`...`, `[pause]`, sentence ends) become real silences; delivery notes (slow, deep, whisper, *pause after 'words'*) shape speed and tone; speed, tone and pause-length controls; Play all. It uses the free voices built into the browser. The most natural Hindi comes from **Microsoft Edge** (Swara / Madhur Natural) or **Chrome** (Google हिन्दी). New scripts include a Devanagari `tts_text` per scene so the Hindi voice reads correctly.
 - **Voice Lab**: a 20-line dialect test in Hinglish, English, Urdu or Nepali. It builds a *Voice DNA* profile that is added to every future prompt, so scripts sound like you.
 - **Profiles & library**: Google sign-in syncs your profile, Voice DNA and scripts across devices. Without signing in, everything is saved in the browser.
 
