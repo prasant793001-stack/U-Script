@@ -1,0 +1,1378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="U-Script: story-driven, fact-locked script studio for informative YouTube channels.">
+<meta name="theme-color" content="#FF6B00">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<title>U-Script</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap">
+<style>
+html{color-scheme:light}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+
+/* Layout: sticky top bar + one working view at a time; a film-clapper stripe is the single loud motif. */
+:root{
+  --bg:#FFF8EE; --surface:#FFFFFF; --surface-2:#FFF1DC; --ink:#1D1340; --ink-2:#5A4F78; --line:#EADBC4;
+  --orange:#FF6B00; --yellow:#FFC22E; --purple:#6A3CE0; --blue:#2E6BFF;
+  --on-accent:#FFFFFF; --ok:#13865A; --warn:#B86A00; --bad:#C8323C; --ok-bg:#E3F6EC; --warn-bg:#FFF0D6; --bad-bg:#FDE6E7; --info-bg:#ECE6FF;
+  --shadow:0 1px 0 rgba(29,19,64,.06),0 8px 24px -12px rgba(29,19,64,.25);
+  --f-display:"Bricolage Grotesque","Arial Black",system-ui,sans-serif;
+  --f-body:"Figtree","Noto Sans Devanagari","Noto Nastaliq Urdu",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#130D29; --surface:#1E1640; --surface-2:#271D52; --ink:#FFF4E2; --ink-2:#BDB2DA; --line:#382C6A;
+  --orange:#FF8A2A; --yellow:#FFC94A; --purple:#9C7BFF; --blue:#6B9BFF;
+  --on-accent:#1A1033; --ok:#4FD39A; --warn:#FFB547; --bad:#FF7A82; --ok-bg:#163A2E; --warn-bg:#3A2C12; --bad-bg:#3D1A22; --info-bg:#2C2260;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.7); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#130D29; --surface:#1E1640; --surface-2:#271D52; --ink:#FFF4E2; --ink-2:#BDB2DA; --line:#382C6A;
+  --orange:#FF8A2A; --yellow:#FFC94A; --purple:#9C7BFF; --blue:#6B9BFF;
+  --on-accent:#1A1033; --ok:#4FD39A; --warn:#FFB547; --bad:#FF7A82; --ok-bg:#163A2E; --warn-bg:#3A2C12; --bad-bg:#3D1A22; --info-bg:#2C2260;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.7); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+h1,h2,h3{font-family:var(--f-display);line-height:1.08;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800}
+h3{font-size:1.1rem;font-weight:700}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px}
+.muted{color:var(--ink-2)}
+.eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--purple)}
+.stripe{height:12px;background:repeating-linear-gradient(-45deg,var(--ink) 0 14px,var(--yellow) 14px 28px);border-radius:3px}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:14px;padding-block:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:1.35rem;background:none;border:0;cursor:pointer;padding:0}
+.brand b{color:var(--orange)}
+.nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.nav button{border:0;background:none;padding:8px 12px;border-radius:999px;font-weight:600;cursor:pointer;color:var(--ink-2)}
+.nav button[aria-current="page"]{background:var(--ink);color:var(--bg)}
+.nav button:hover:not([aria-current="page"]){background:var(--surface-2);color:var(--ink)}
+.chip-user{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px 4px 4px;cursor:pointer;font-weight:600}
+.avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--purple);color:#fff;font-weight:800;font-size:.85rem}
+
+/* buttons & fields */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:2px solid var(--ink);background:var(--surface);color:var(--ink);border-radius:12px;padding:9px 16px;font-weight:700;cursor:pointer;text-decoration:none;transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink)}
+.btn:active{transform:none;box-shadow:none}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:var(--on-accent)}
+.btn.primary:hover{box-shadow:3px 3px 0 var(--ink)}
+.btn.purple{background:var(--purple);border-color:var(--purple);color:#fff}
+.btn.ghost{border-color:var(--line)}
+.btn.small{padding:6px 11px;font-size:.85rem;border-radius:10px;border-width:1.5px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn.mega{font-family:var(--f-display);font-size:1.25rem;padding:16px 28px;border-radius:16px;letter-spacing:.02em}
+label.f{display:grid;gap:6px;font-weight:600;font-size:.9rem;min-width:0}
+input[type=text],select,textarea{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-weight:500}
+textarea{resize:vertical;min-height:90px;line-height:1.5}
+input[type=text]:focus,select:focus,textarea:focus{border-color:var(--purple);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--purple) 25%,transparent)}
+.mono{font-family:var(--f-mono);font-size:.82rem}
+
+/* landing */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding-block:48px 28px}
+.hero h1{font-size:clamp(2.6rem,7vw,5rem);font-weight:800;letter-spacing:-.03em}
+.hero h1 .o{color:var(--orange)} .hero h1 .p{color:var(--purple)}
+.hero .lede{font-size:1.15rem;margin-top:16px;max-width:52ch;color:var(--ink-2)}
+.page-card{background:var(--surface);border:2px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 var(--yellow);transform:rotate(1.5deg);overflow:hidden}
+.page-card .clap{height:34px;background:repeating-linear-gradient(-60deg,var(--ink) 0 18px,#fff 18px 36px);border-bottom:2px solid var(--ink)}
+.page-card .body{padding:18px 20px;font-family:var(--f-mono);font-size:.8rem;display:grid;gap:10px}
+.page-card .scn{color:var(--orange);font-weight:700}
+.page-card .vo{color:var(--ink)} .page-card .vis{color:var(--purple)} .page-card .sfx{color:var(--blue)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding-block:20px 48px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:6px;align-content:start}
+.step .n{font-family:var(--f-display);font-weight:800;font-size:1.6rem;color:var(--orange)}
+.signin{background:var(--surface);border:2px solid var(--ink);border-radius:18px;padding:22px;display:grid;gap:14px;max-width:560px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn.google{background:#fff;color:#1F1F1F;border-color:#1D1340;font-size:1rem;padding:11px 18px;justify-self:start}
+.or{display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--ink-2);font-weight:600}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.note{font-size:.85rem;color:var(--ink-2);background:var(--surface-2);border-radius:10px;padding:10px 12px}
+
+/* studio */
+.view{padding-block:28px 64px}
+.view-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;gap:14px;min-width:0}
+.panel + .panel{margin-top:16px}
+.panel-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.num{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--ink);color:var(--yellow);font-family:var(--f-display);font-weight:800;flex:none}
+.topic-row{display:grid;grid-template-columns:1fr auto;gap:10px}
+.amaze{background:linear-gradient(135deg,var(--yellow),var(--orange));border:2px solid var(--ink);color:#1D1340;font-family:var(--f-display);font-weight:800;border-radius:12px;padding:0 20px;cursor:pointer;font-size:1.05rem}
+.amaze:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-size:.9rem}
+.chip .dot{width:9px;height:9px;border-radius:50%}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:hover:not([aria-pressed="true"]){border-color:var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.truth{display:flex;gap:14px;align-items:flex-start;border-radius:14px;padding:14px 16px;border:2px solid var(--ok);background:var(--ok-bg)}
+.truth.off{border-color:var(--line);background:var(--surface-2)}
+.truth .lock{font-family:var(--f-display);font-weight:800;color:var(--ok);font-size:1.05rem}
+.truth.off .lock{color:var(--ink-2)}
+.toggle{position:relative;width:46px;height:26px;flex:none;appearance:none;background:var(--line);border-radius:999px;cursor:pointer;transition:background .15s;margin:2px 0 0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.toggle:checked{background:var(--ok)} .toggle:checked::after{left:23px}
+.toggle:disabled{opacity:.7;cursor:not-allowed}
+.checks{display:flex;flex-wrap:wrap;gap:8px 18px}
+.checks label{display:flex;gap:8px;align-items:center;font-weight:500;cursor:pointer}
+.checks input{accent-color:var(--purple);width:17px;height:17px}
+.dur-meta{font-size:.85rem;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.gen-zone{display:grid;justify-items:center;gap:10px;padding-block:24px 8px;text-align:center}
+.prompt-out{display:grid;gap:12px}
+.prompt-box{background:var(--surface-2);border:1.5px solid var(--line);border-radius:12px;padding:14px;max-height:420px;overflow:auto;white-space:pre-wrap;font-family:var(--f-mono);font-size:.78rem;line-height:1.55;min-width:0}
+.ai-row{display:flex;gap:10px;flex-wrap:wrap}
+.ai{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--ink);border-radius:12px;padding:9px 14px;font-weight:700;text-decoration:none;color:var(--ink);background:var(--surface)}
+.ai:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
+.ai i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* board */
+.paste-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.summary{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-family:var(--f-display);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-weight:700}
+.exports{display:flex;flex-wrap:wrap;gap:8px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.74rem;font-weight:700;white-space:nowrap}
+.pill.verified{background:var(--ok-bg);color:var(--ok)}
+.pill.disputed,.pill.needs_verification{background:var(--warn-bg);color:var(--warn)}
+.pill.dramatized,.pill.legend{background:var(--info-bg);color:var(--purple)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.scenes{display:grid;gap:14px}
+.scene{background:var(--surface);border:1px solid var(--line);border-radius:16px;display:grid;grid-template-columns:86px 1fr 1fr;overflow:hidden}
+.scene .tc{background:var(--ink);color:var(--bg);padding:14px 10px;display:grid;align-content:start;gap:4px;text-align:center}
+.scene .tc b{font-family:var(--f-display);font-size:1.7rem;color:var(--yellow);line-height:1}
+.scene .tc span{font-family:var(--f-mono);font-size:.72rem;font-variant-numeric:tabular-nums}
+.scene .tc em{font-style:normal;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;opacity:.75}
+.scene .col{padding:14px 16px;display:grid;gap:10px;align-content:start;min-width:0}
+.scene .col + .col{border-left:1px dashed var(--line);background:var(--surface-2)}
+.lbl{font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.lbl.vo{color:var(--orange)} .lbl.vis{color:var(--purple)} .lbl.sfx{color:var(--blue)} .lbl.mus{color:var(--ok)}
+.vo-text{font-size:1.02rem;line-height:1.6;white-space:pre-wrap}
+.vo-text[dir=rtl]{font-family:"Noto Nastaliq Urdu",var(--f-body);line-height:2.2}
+.delivery{font-size:.82rem;color:var(--ink-2);font-style:italic}
+.cprompt{font-family:var(--f-mono);font-size:.76rem;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.78rem;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 8px}
+.scene-h{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.empty{border:2px dashed var(--line);border-radius:18px;padding:32px;text-align:center;display:grid;gap:10px;justify-items:center}
+
+/* voice lab */
+.lab-top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.progress{height:10px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--yellow),var(--orange));transition:width .2s}
+.lines{display:grid;gap:10px}
+.line{display:grid;grid-template-columns:34px 1fr 1.2fr;gap:12px;align-items:start;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.line .k{font-family:var(--f-display);font-weight:800;color:var(--ink-2);font-variant-numeric:tabular-nums;padding-top:9px}
+.line .src{padding-top:9px;font-weight:600}
+.line textarea{min-height:44px;height:44px}
+.line.done{border-color:color-mix(in srgb,var(--ok) 50%,var(--line))}
+.dna{background:var(--surface-2);border-radius:12px;padding:14px;white-space:pre-wrap;font-size:.9rem;max-height:360px;overflow:auto}
+
+/* library */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:8px;align-content:start}
+.pcard h3{font-size:1.05rem}
+.lang-status{display:grid;gap:8px}
+.lang-status div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;background:var(--surface-2);border-radius:10px}
+
+/* toast & modal */
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:600;opacity:0;pointer-events:none;transition:all .2s;z-index:50;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal-bg{position:fixed;inset:0;background:rgba(10,6,25,.55);z-index:40;display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);border-radius:18px;padding:20px;width:min(760px,100%);max-height:85vh;display:grid;gap:12px;grid-template-rows:auto 1fr auto;border:2px solid var(--ink)}
+.modal textarea{height:100%;min-height:260px;font-family:var(--f-mono);font-size:.8rem}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;padding-block:28px 16px}
+  .page-card{transform:none;max-width:520px}
+  .steps{grid-template-columns:1fr 1fr}
+  .opts{grid-template-columns:1fr 1fr}
+  .summary{grid-template-columns:1fr}
+  .scene{grid-template-columns:70px 1fr}
+  .scene .col + .col{grid-column:1/-1;border-left:0;border-top:1px dashed var(--line)}
+  .lab-top{grid-template-columns:1fr 1fr}
+  .line{grid-template-columns:28px 1fr}
+  .line textarea{grid-column:2}
+}
+@media (max-width:560px){
+  .steps,.opts,.grid2,.lab-top{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .topic-row{grid-template-columns:1fr}
+  .amaze{padding:12px}
+  .nav{margin-left:0;width:100%}
+  .scene{grid-template-columns:1fr}
+  .scene .tc{display:flex;gap:12px;align-items:baseline;text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <button class="brand" id="brand" aria-label="U-Script home">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFD23F"/><stop offset="1" stop-color="#FF6B00"/></linearGradient></defs>
+        <rect x="1" y="1" width="38" height="38" rx="11" fill="url(#lg)"/>
+        <path d="M12 9v12.5a8 8 0 0 0 16 0V9" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+        <path d="M20 26.5l-3 6 3 2.5 3-2.5z" fill="#fff"/>
+        <circle cx="31.5" cy="8.5" r="3" fill="#fff"/>
+      </svg>
+      <span>U-<b>Script</b></span>
+    </button>
+    <nav class="nav" id="nav" hidden>
+      <button data-go="studio">Studio</button>
+      <button data-go="board">Scene Board</button>
+      <button data-go="voice">Voice Lab</button>
+      <button data-go="library">Library</button>
+    </nav>
+    <button class="chip-user" id="userchip" hidden><span class="avatar" id="avatar">U</span><span id="uname">You</span></button>
+  </div>
+</header>
+
+<main>
+<!-- LANDING -->
+<section id="v-landing" class="wrap">
+  <div class="hero">
+    <div>
+      <p class="eyebrow">Script studio for story-driven channels</p>
+      <h1>Stories that <span class="o">grip.</span><br>Facts that <span class="p">hold.</span></h1>
+      <p class="lede">Pick a topic, pick a mood, and U-Script writes a director-grade brief for Claude, ChatGPT or Gemini. Paste the answer back and get a scene-by-scene board: voiceover, ComfyUI visual prompts, music and sound effects, ready to download.</p>
+      <div class="signin" style="margin-top:24px">
+        <h3 id="si-title">Sign in or register</h3>
+        <div id="si-auth" style="display:grid;gap:10px">
+          <button class="btn google" id="si-google" hidden>
+            <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+            Continue with Google
+          </button>
+          <p class="muted" id="si-acct" style="font-size:.88rem"></p>
+          <p class="or" id="si-or">or start without an account (saved in this browser only)</p>
+        </div>
+        <div class="grid2">
+          <label class="f">Your name<input type="text" id="si-name" placeholder="e.g. Prasant" autocomplete="name"></label>
+          <label class="f">Channel name<input type="text" id="si-channel" placeholder="e.g. Raaz Ki Kahaani"></label>
+        </div>
+        <label class="f">Main language
+          <select id="si-lang"><option>Hinglish</option><option>English</option><option>Urdu</option><option>Nepali</option></select>
+        </label>
+        <div class="row">
+          <button class="btn primary" id="si-go">Enter the studio</button>
+          <span class="muted" id="si-sync" style="font-size:.85rem">Checking your account…</span>
+        </div>
+      </div>
+    </div>
+    <div class="page-card" aria-hidden="true">
+      <div class="clap"></div>
+      <div class="body">
+        <div class="scn">SCENE 01 · 00:00 · HOOK</div>
+        <div class="vo">VO: "13 April 1970. Dharti se 3 lakh kilometre se zyada door, teen log… aur ek awaaz: <i>Houston, we've had a problem.</i>"</div>
+        <div class="vis">VISUAL: dark capsule interior, warning lights flicker amber, slow push-in on a gloved hand</div>
+        <div class="sfx">SFX: metallic bang · alarm tone · radio static</div>
+        <div class="scn">SCENE 02 · 00:14 · SETUP</div>
+        <div class="vo">VO: "Teen din pehle, sab kuch perfect tha…"</div>
+        <div class="vis">VISUAL: Saturn V on the launch pad, dawn, archival film grain</div>
+      </div>
+    </div>
+  </div>
+  <div class="stripe"></div>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><h3>Choose</h3><p class="muted">Topic or Amaze Me, genre, length, language, narrator, hook and style.</p></div>
+    <div class="step"><span class="n">2</span><h3>Generate prompt</h3><p class="muted">A full writer's brief with Truth Lock research rules, copied and opened in your AI.</p></div>
+    <div class="step"><span class="n">3</span><h3>Paste result</h3><p class="muted">The JSON turns into scene cards with voiceover, visuals, music and SFX.</p></div>
+    <div class="step"><span class="n">4</span><h3>Download</h3><p class="muted">Separate .md files for voiceover, ComfyUI prompts, music and SFX.</p></div>
+  </div>
+</section>
+
+<!-- STUDIO -->
+<section id="v-studio" class="wrap view" hidden>
+  <div class="view-head">
+    <div><p class="eyebrow">Studio</p><h2>What story are we telling today?</h2></div>
+    <button class="btn ghost small" id="reset-brief">Start a fresh brief</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><span class="num">1</span><h3>Topic</h3></div>
+    <div class="topic-row">
+      <input type="text" id="topic" placeholder="Type a topic, event, person or question… or let us surprise you">
+      <button class="amaze" id="amaze">Amaze me!</button>
+    </div>
+    <p class="muted" id="amaze-note" style="font-size:.85rem">Amaze Me picks a well-documented story from the selected genre, or from any genre if none is selected.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><span class="num">2</span><h3>Genre</h3></div>
+    <div class="chips" id="genres"></div>
+    <div class="truth" id="truthbox">
+      <input type="checkbox" class="toggle" id="truth" aria-label="Truth Lock">
+      <div style="display:grid;gap:4px">
+        <span class="lock" id="truth-title">Truth Lock is ON</span>
+        <span class="muted" id="truth-desc" style="font-size:.88rem"></span>
+      </div>
+    </div>
+    <div class="opts">
+      <label class="f">Story basis
+        <select id="basis"><option value="real">Real events (Truth Lock)</option><option value="legend">Legend / folklore (labelled as legend)</option><option value="fiction">Original fiction</option></select>
+      </label>
+      <label class="f">Research depth
+        <select id="depth"><option value="standard">Standard: 2 sources per fact</option><option value="deep">Deep: 3 sources per fact</option></select>
+      </label>
+      <label class="f">Audience
+        <select id="audience"><option>General audience</option><option>Teens</option><option>Family safe (no gore, no strong language)</option><option>Mature (18+, still no gratuitous gore)</option></select>
+      </label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><span class="num">3</span><h3>Length & format</h3></div>
+    <div class="chips" id="durations"></div>
+    <p class="dur-meta" id="dur-meta"></p>
+    <div class="opts">
+      <label class="f">Platform
+        <select id="platform"><option value="long">YouTube long-form · 16:9</option><option value="short">Shorts / Reels / TikTok · 9:16</option><option value="podcast">Podcast / audio story</option></select>
+      </label>
+      <label class="f">Narrator
+        <select id="narrator"><option>Documentary narrator (third person)</option><option>Host speaking to the viewer</option><option>Campfire storyteller</option><option>First-person reconstruction (clearly labelled)</option></select>
+      </label>
+      <label class="f">Opening hook
+        <select id="hook"><option>Shocking verified fact</option><option>Cold open inside the action</option><option>A question the viewer can't ignore</option><option>Flash-forward: show the ending first</option><option>Sound-only open, then a reveal</option></select>
+      </label>
+      <label class="f">Ending
+        <select id="ending"><option>Twist or final reveal</option><option>Emotional reflection</option><option>Open question</option><option>Lesson for today</option><option>Cliffhanger into Part 2</option></select>
+      </label>
+      <label class="f">Intensity <span class="muted" id="int-v">3 / 5</span>
+        <input type="range" id="intensity" min="1" max="5" value="3" style="accent-color:var(--orange)">
+      </label>
+      <label class="f">Part of a series?
+        <input type="text" id="series" placeholder="e.g. Part 1 of 3 (optional)">
+      </label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><span class="num">4</span><h3>Language & voice</h3></div>
+    <div class="opts">
+      <label class="f">Narration language
+        <select id="lang"><option>Hinglish</option><option>English</option><option>Urdu</option><option>Nepali</option></select>
+      </label>
+      <label class="f">Writing script
+        <select id="script"></select>
+      </label>
+      <label class="f">Voice style
+        <select id="voicestyle"><option>Warm and conversational</option><option>Deep, slow, cinematic</option><option>Energetic and punchy</option><option>Calm and intimate</option><option>News-anchor crisp</option></select>
+      </label>
+    </div>
+    <div class="note" id="dna-note"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-h"><span class="num">5</span><h3>Look, sound & extras</h3></div>
+    <div class="opts">
+      <label class="f">Visual style (ComfyUI)
+        <select id="vstyle"><option>Cinematic photoreal</option><option>Dark documentary, moody lighting</option><option>Archival / vintage film grain</option><option>Anime</option><option>2D illustrated storybook</option><option>Painterly, oil-paint look</option><option>Stylised 3D render</option></select>
+      </label>
+      <label class="f">Music direction
+        <select id="music"><option>Cinematic orchestral</option><option>Dark ambient / drones</option><option>Indian classical fusion</option><option>Minimal piano</option><option>Electronic pulse</option><option>Lo-fi, mellow</option></select>
+      </label>
+      <label class="f">Scene pace
+        <select id="pace"><option value="auto">Auto (match genre)</option><option value="fast">Fast cuts (5–8 s scenes)</option><option value="medium">Medium (8–14 s)</option><option value="slow">Slow burn (14–22 s)</option></select>
+      </label>
+    </div>
+    <div class="grid2">
+      <label class="f">Must include<textarea id="must" placeholder="Specific facts, a person, a place, a moment you want covered"></textarea></label>
+      <label class="f">Avoid<textarea id="avoid" placeholder="Anything to skip: graphic detail, a sensitive angle, a cliché"></textarea></label>
+    </div>
+    <div class="checks" id="extras">
+      <label><input type="checkbox" value="titles" checked> 5 click-worthy titles</label>
+      <label><input type="checkbox" value="thumb" checked> Thumbnail ideas</label>
+      <label><input type="checkbox" value="desc" checked> YouTube description, chapters & tags</label>
+      <label><input type="checkbox" value="bible" checked> Character & location bible (consistent faces in ComfyUI)</label>
+      <label><input type="checkbox" value="broll" checked> Motion / video prompts per scene</label>
+    </div>
+  </div>
+
+  <div class="gen-zone">
+    <button class="btn primary mega" id="generate">GENERATE PROMPT</button>
+    <p class="muted" style="font-size:.85rem" id="gen-hint">Pick a topic and a genre to unlock.</p>
+  </div>
+
+  <div class="panel prompt-out" id="prompt-out" hidden>
+    <div class="panel-h" style="justify-content:space-between">
+      <div class="row"><span class="num">6</span><h3>Your prompt is ready</h3></div>
+      <div class="row">
+        <button class="btn small" id="copy-prompt">Copy prompt</button>
+        <button class="btn small ghost" id="dl-prompt">Download .md</button>
+        <button class="btn small ghost" id="save-brief">Save to library</button>
+      </div>
+    </div>
+    <p class="muted">Tap an AI below. The prompt is copied for you; paste it in the chat and send. For Truth Lock topics, use a model with web search turned on.</p>
+    <div class="ai-row">
+      <a class="ai" data-ai="Claude" href="https://claude.ai/new" target="_blank" rel="noopener"><i style="background:#D97757"></i>Open Claude</a>
+      <a class="ai" data-ai="ChatGPT" href="https://chatgpt.com/" target="_blank" rel="noopener"><i style="background:#10A37F"></i>Open ChatGPT</a>
+      <a class="ai" data-ai="Gemini" href="https://gemini.google.com/app" target="_blank" rel="noopener"><i style="background:#4C8DF6"></i>Open Gemini</a>
+      <button class="btn purple" id="run-here" hidden>Write it here with Claude</button>
+    </div>
+    <div class="prompt-box" id="prompt-box"></div>
+    <div class="row"><button class="btn primary" id="to-board">I have the result → Scene Board</button></div>
+  </div>
+</section>
+
+<!-- BOARD -->
+<section id="v-board" class="wrap view" hidden>
+  <div class="view-head">
+    <div><p class="eyebrow">Scene Board</p><h2 id="board-title">Paste the AI's answer</h2></div>
+    <div class="row"><button class="btn small ghost" id="load-example">Load example</button><button class="btn small ghost" id="clear-board">Clear</button></div>
+  </div>
+  <div class="panel" id="paste-panel">
+    <label class="f" for="paste">Paste the full reply (the JSON block). Extra text around it is fine.</label>
+    <textarea id="paste" class="mono" style="min-height:160px" placeholder='{"project": {...}, "scenes": [...]}'></textarea>
+    <div class="row"><button class="btn primary" id="build">Build scenes</button><span class="muted" id="parse-msg" style="font-size:.88rem"></span></div>
+  </div>
+  <div id="board-out"></div>
+</section>
+
+<!-- VOICE LAB -->
+<section id="v-voice" class="wrap view" hidden>
+  <div class="view-head">
+    <div><p class="eyebrow">Voice Lab</p><h2>Teach U-Script how <span id="vl-name">you</span> speak</h2></div>
+  </div>
+  <div class="panel">
+    <p class="muted" style="max-width:70ch">Read each line, then write it the way you would actually say it on camera: your words, your slang, your mix of English. Do it once per language. The AI then builds a short <b>Voice DNA</b> profile that gets added to every prompt, together with a few of your real lines as anchors. That keeps prompts short and your voice consistent.</p>
+    <div class="lab-top">
+      <label class="f">Language<select id="vl-lang"><option>Hinglish</option><option>English</option><option>Urdu</option><option>Nepali</option></select></label>
+      <label class="f">Where you're from<input type="text" id="vl-region" placeholder="e.g. Lucknow, Lahore, Pokhara"></label>
+      <label class="f">English mixing<select id="vl-mix"><option>Very little</option><option selected>Balanced</option><option>A lot</option></select></label>
+      <label class="f">How you address viewers<select id="vl-form"></select></label>
+    </div>
+    <div class="row" style="justify-content:space-between"><span class="muted" id="vl-count" style="font-variant-numeric:tabular-nums">0 / 20 lines</span><button class="btn small ghost" id="vl-save">Save answers</button></div>
+    <div class="progress"><i id="vl-bar" style="width:0%"></i></div>
+  </div>
+  <div class="lines" id="vl-lines" style="margin-top:16px"></div>
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-h"><span class="num">DNA</span><h3>Build your Voice DNA</h3></div>
+    <p class="muted">Generate the analysis prompt, run it in any AI (or here), then paste the profile back and save it.</p>
+    <div class="ai-row">
+      <button class="btn primary" id="vl-gen">Generate Voice DNA prompt</button>
+      <a class="ai" data-ai="Claude" data-src="dna" href="https://claude.ai/new" target="_blank" rel="noopener"><i style="background:#D97757"></i>Claude</a>
+      <a class="ai" data-ai="ChatGPT" data-src="dna" href="https://chatgpt.com/" target="_blank" rel="noopener"><i style="background:#10A37F"></i>ChatGPT</a>
+      <a class="ai" data-ai="Gemini" data-src="dna" href="https://gemini.google.com/app" target="_blank" rel="noopener"><i style="background:#4C8DF6"></i>Gemini</a>
+      <button class="btn purple" id="vl-run" hidden>Build it here with Claude</button>
+    </div>
+    <div class="prompt-box" id="vl-prompt" hidden></div>
+    <label class="f">Paste the Voice DNA result<textarea id="vl-paste" style="min-height:160px" placeholder="Paste the profile the AI wrote for you"></textarea></label>
+    <div class="row"><button class="btn primary" id="vl-dna-save">Save Voice DNA to my profile</button><span class="muted" id="vl-status" style="font-size:.88rem"></span></div>
+  </div>
+</section>
+
+<!-- LIBRARY -->
+<section id="v-library" class="wrap view" hidden>
+  <div class="view-head"><div><p class="eyebrow">Library</p><h2>Your profile & saved scripts</h2></div></div>
+  <div class="summary">
+    <div class="panel">
+      <h3>Saved projects</h3>
+      <div class="cards" id="lib-cards"></div>
+    </div>
+    <div class="panel">
+      <h3>Profile</h3>
+      <div class="grid2">
+        <label class="f">Name<input type="text" id="pf-name"></label>
+        <label class="f">Channel<input type="text" id="pf-channel"></label>
+      </div>
+      <h3 style="font-size:.95rem;margin-top:4px">Voice DNA</h3>
+      <div class="lang-status" id="pf-langs"></div>
+      <p class="note" id="pf-sync"></p>
+      <div class="row">
+        <button class="btn small primary" id="pf-save">Save profile</button>
+        <button class="btn small ghost" id="pf-export">Export profile</button>
+        <label class="btn small ghost" style="cursor:pointer">Import profile<input type="file" id="pf-import" accept=".json,application/json" hidden></label>
+      </div>
+      <div class="row">
+        <button class="btn small google" id="pf-google" hidden>Sign in with Google to sync</button>
+        <button class="btn small ghost" id="pf-signout" hidden>Sign out</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="modal-bg" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+    <div class="row" style="justify-content:space-between"><h3 id="modal-t">File</h3><button class="btn small ghost" id="modal-x">Close</button></div>
+    <textarea id="modal-text" readonly></textarea>
+    <div class="row"><button class="btn small primary" id="modal-copy">Copy all</button><span class="muted" style="font-size:.85rem">If the download didn't start, copy this text into a new file.</span></div>
+  </div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const GENRES = {
+  mystery:{label:"Mystery",color:"#6A3CE0",basis:"real",pace:"medium",craft:[
+    "State the central mystery within the first 15 seconds. Open on the question, not the answer.",
+    "Plant every clue fairly before you use it, so the viewer could solve it in hindsight.",
+    "End every act on a new question or a detail that does not fit.",
+    "Restraint beats adjectives: quiet, precise sentences, and write the pauses in.",
+    "Say clearly what is evidence and what is theory: 'Here is what we know… here is what people believe…'",
+    "Answer what can be answered, and be honest about what is still unknown."]},
+  crime:{label:"True Crime",color:"#C8323C",basis:"real",pace:"medium",craft:[
+    "Respect the victims: name them as people, never as plot devices. Never glamourise the offender.",
+    "Build like a procedural: the act, the investigation, the break, the consequence.",
+    "Anchor the viewer with dates, times and places as on-screen text.",
+    "Tension comes from evidence details (a receipt, a call record), not gore.",
+    "Use legal words exactly as the record supports: accused, charged, convicted, acquitted.",
+    "Close on the aftermath and what changed."]},
+  horror:{label:"Horror",color:"#1D1340",basis:"real",pace:"slow",craft:[
+    "Dread over shock: build slowly and make the ordinary feel wrong.",
+    "Sound is half the fear: write in silences, breathing, creaks and distant noises.",
+    "Long calm sentences before the scare, very short sentences at the peak.",
+    "Never show everything. Leave the worst to the viewer's imagination.",
+    "If it's based on real events, the facts stay factual and legends are called legends.",
+    "Finish on one image or line that stays with the viewer after the video ends."]},
+  survival:{label:"Survival",color:"#13865A",basis:"real",pace:"medium",craft:[
+    "Start a clock early (oxygen, food, temperature, days) and keep counting it down.",
+    "Make the viewer feel the body: cold, hunger, thirst, exhaustion, in specific sensory detail.",
+    "Show each choice before its outcome. Every decision has a cost.",
+    "Alternate hope and setback so tension keeps rising.",
+    "Every real number (altitude, temperature, days) comes from a verified source.",
+    "Land on what kept them alive: the human lesson."]},
+  love:{label:"Love & Drama",color:"#E0457B",basis:"real",pace:"slow",craft:[
+    "Emotion lives in small specific details (a letter, a habit, a look), not big adjectives.",
+    "Love stories run on what keeps people apart. Show the longing and the obstacle.",
+    "Give each person a voice and a want of their own.",
+    "Hold the music back until the emotional peak, then let it rise.",
+    "With real people, quote only verified words and mark imagined moments as imagined.",
+    "End on a feeling the viewer carries home."]},
+  history:{label:"History",color:"#B86A00",basis:"real",pace:"medium",craft:[
+    "Tell the big event through one or two real people so it has a human face.",
+    "Paint the era with verified texture: sounds, prices, clothing, how people travelled.",
+    "Use 'imagine you are standing here…' sparingly to drop the viewer into the moment.",
+    "Make cause and effect clear. History is a chain: show the links.",
+    "Separate what historians agree on from what is debated.",
+    "Close by connecting it to today."]},
+  war:{label:"War",color:"#5A5A3C",basis:"real",pace:"medium",craft:[
+    "Honour the people on all sides. Never glorify violence.",
+    "Tell it through named units or individuals taken from records.",
+    "Be clear on where, who and how many; give ranges and sources where historians differ.",
+    "Contrast the chaos of battle with quiet human moments.",
+    "Imply the cost; no graphic gore.",
+    "End with the toll and how it is remembered."]},
+  science:{label:"Science & Space",color:"#2E6BFF",basis:"real",pace:"medium",craft:[
+    "Make one big idea feel simple, then surprising.",
+    "Use analogies from daily life: a cricket ball, a cup of chai, a train.",
+    "Tell the discovery like a detective story: question, failed attempts, breakthrough.",
+    "Exact, sourced numbers, with a scale comparison the viewer can picture.",
+    "No hype words ('proves', 'cure', 'solved') unless literally true.",
+    "End on the question science is still asking."]},
+  disaster:{label:"Disaster",color:"#D9480F",basis:"real",pace:"fast",craft:[
+    "Show normal life before the disaster so the loss means something.",
+    "Use a minute-by-minute timeline with verified times.",
+    "Explain the technical cause simply and accurately.",
+    "Respect the dead and the survivors; no sensational imagery.",
+    "Show the warning signs that were missed, if they are documented.",
+    "End on lessons, changes in law or safety, and memory."]},
+  biography:{label:"Biography",color:"#0E8A8A",basis:"real",pace:"medium",craft:[
+    "Open at the defining moment, then rewind.",
+    "Show the failures before the success; they make the win matter.",
+    "Only verified quotes, attributed precisely.",
+    "Three acts: origin, struggle, legacy.",
+    "Small personal details make a legend human.",
+    "End with the legacy and one line the viewer remembers."]},
+  scams:{label:"Scams & Money",color:"#8A6D00",basis:"real",pace:"fast",craft:[
+    "Explain how the trick worked, step by step, so the viewer understands the mechanics.",
+    "Show why smart people believed it.",
+    "Follow the money with verified figures, with currency and year for context.",
+    "Use legal terms precisely: accused, charged, convicted, acquitted.",
+    "Build to the moment it collapsed.",
+    "End with how viewers can protect themselves."]},
+  nature:{label:"Nature & Wildlife",color:"#3E8E2F",basis:"real",pace:"slow",craft:[
+    "Find one character: one animal, one herd, one tree.",
+    "Lead with the 'wait, really?' fact.",
+    "Precise, verified biology; only a light touch of human feelings for animals.",
+    "Write the sound of the habitat into each scene.",
+    "Show the stakes: season, predator, survival.",
+    "End on awe, or the honest conservation picture."]},
+  psychology:{label:"Psychology",color:"#9C4FD6",basis:"real",pace:"medium",craft:[
+    "Open with a situation the viewer has personally felt.",
+    "Describe studies accurately: who, when, sample size, plus known criticisms or failed replications.",
+    "Separate findings from pop-psychology myths.",
+    "Use 'you' so the viewer tests themselves.",
+    "Never diagnose the viewer.",
+    "End with one practical takeaway."]},
+  tech:{label:"Tech",color:"#2E6BFF",basis:"real",pace:"fast",craft:[
+    "Explain the problem before the technology that solved it.",
+    "People and rivalries make tech stories human.",
+    "Accurate dates, versions and names.",
+    "Explain every term with an analogy; leave no jargon hanging.",
+    "Show the unintended consequences.",
+    "End with where it is heading, clearly labelled as projection."]},
+  mythology:{label:"Mythology & Folklore",color:"#C2410C",basis:"legend",pace:"slow",craft:[
+    "Tell it as legend ('it is said', 'according to the epic'), never as historical fact.",
+    "Name the source text or tradition and note where regional versions differ.",
+    "Respect religious feeling; no mockery.",
+    "Grand, rhythmic narration. Let the language sing.",
+    "Visuals can be epic and stylised.",
+    "End with the meaning the story carries."]},
+  unsolved:{label:"Unsolved & Theories",color:"#4B3B8F",basis:"real",pace:"medium",craft:[
+    "Lay out the verified facts first, cleanly.",
+    "Give each theory with the evidence for and against it.",
+    "Never present a theory as fact; rank them by evidence.",
+    "Use a case-file structure: Exhibit A, B, C.",
+    "Never make defamatory claims about real living people.",
+    "End honestly: what would it take to solve it?"]},
+  motivation:{label:"Motivation",color:"#FF6B00",basis:"real",pace:"fast",craft:[
+    "One real person, one real struggle, one turning point.",
+    "Verified facts only; never invent hardship for drama.",
+    "Build energy with rhythm: short punches, then a long breath.",
+    "Speak straight to the viewer at the end.",
+    "Avoid clichés. Earn the emotion.",
+    "End with one action the viewer can take today."]}
+};
+
+const AMAZE = {
+  mystery:["The Dyatlov Pass incident (1959)","Roopkund, the Skeleton Lake of Uttarakhand","The Mary Celeste ghost ship (1872)","The Voynich manuscript","The Taman Shud case (Somerton Man, 1948)"],
+  crime:["The 1911 theft of the Mona Lisa","The Antwerp diamond heist (2003)","The D.B. Cooper hijacking (1971)","The Great Train Robbery (1963)","Charles Sobhraj, 'The Serpent'"],
+  horror:["The Dancing Plague of Strasbourg (1518)","Kuldhara, Rajasthan's abandoned village","The Radium Girls","The legends of Bhangarh Fort","The Tanganyika laughter epidemic (1962)"],
+  survival:["Apollo 13 (1970)","Uruguayan Air Force Flight 571 in the Andes (1972)","Shackleton's Endurance expedition (1914–1917)","Juliane Koepcke's fall into the Amazon (1971)","The Tham Luang cave rescue, Thailand (2018)","The 33 Chilean miners (2010)"],
+  love:["Shah Jahan, Mumtaz Mahal and the Taj Mahal","Marie and Pierre Curie","Dashrath Manjhi, the Mountain Man","Amrita Pritam and Imroz","Heer Ranjha (as folklore)"],
+  history:["The fall of Constantinople (1453)","Mohenjo-daro and the Indus Valley Civilisation","Tenzing Norgay and Edmund Hillary on Everest (1953)","The Library of Alexandria","The Salt March (1930)"],
+  war:["The Battle of Saragarhi (1897)","The Christmas Truce of 1914","The Gurkhas of the British Army","Operation Mincemeat (1943)"],
+  science:["The Voyager Golden Record","Chandrayaan-3's landing near the Moon's south pole (2023)","The accidental discovery of penicillin (1928)","The first image of a black hole (2019)","Srinivasa Ramanujan's notebooks"],
+  disaster:["The Bhopal gas tragedy (1984)","Chernobyl (1986)","The sinking of the Titanic (1912)","The 2004 Indian Ocean tsunami","The Great Molasses Flood of Boston (1919)"],
+  biography:["Arunima Sinha, the first female amputee to climb Everest","Nikola Tesla","Kalpana Chawla","Milkha Singh","Malala Yousafzai"],
+  scams:["Harshad Mehta and the 1992 securities scam","Tulip mania (1637)","Charles Ponzi's original scheme (1920)","The Enron collapse (2001)"],
+  nature:["Tardigrades, the toughest animals on Earth","The monarch butterfly migration","How octopuses think","The Sundarbans tigers"],
+  psychology:["The Stanford Prison Experiment and its criticisms","The bystander effect and the Kitty Genovese case","The marshmallow test, and what later studies found"],
+  tech:["ARPANET and the first message on the internet (1969)","The Y2K bug","How the QWERTY keyboard was born"],
+  mythology:["Abhimanyu and the Chakravyuh","The legend of the Yeti","Raja Vikram and Betaal","The Churning of the Ocean (Samudra Manthan)"],
+  unsolved:["The disappearance of Malaysia Airlines MH370 (2014)","The Zodiac Killer","The Wow! signal (1977)","Netaji Subhas Chandra Bose's disappearance (1945)"],
+  motivation:["Dashrath Manjhi carving a road through a mountain","Arunima Sinha on Everest","Kalpana Chawla's road to space"]
+};
+
+const DURATIONS = [["0.75","45 sec"],["1","60 sec"],["3","3 min"],["5","5 min"],["8","8 min"],["10","10 min"],["15","15 min"],["20","20 min"],["30","30 min"]];
+const WPM = {Hinglish:140, English:150, Urdu:130, Nepali:125};
+const SCRIPTS = {Hinglish:["Roman (Latin letters)","Devanagari"], English:["Latin"], Urdu:["Urdu (Nastaliq)","Roman Urdu"], Nepali:["Devanagari","Roman Nepali"]};
+const FORMALITY = {Hinglish:["Aap (respectful)","Tum (friendly)","Tu / bhai (very casual)"], Urdu:["Aap (respectful)","Tum (friendly)","Tu / yaar (very casual)"], Nepali:["Hajur (respectful)","Tapai (polite)","Timi (friendly)"], English:["Polite","Friendly","Very casual"]};
+const LANG_RULES = {
+  Hinglish:"Natural spoken Hinglish, the way popular Indian storytelling YouTubers talk: Hindi grammar with English words exactly where real people use them (time, numbers, tech, emotions like 'shock' or 'plan'). No shuddh/textbook Hindi, no forced English.",
+  English:"Clear spoken English for a global South Asian audience: short sentences, everyday words, no idioms that only work in one country.",
+  Urdu:"Natural spoken Urdu, warm and expressive. Use classical or Persian-rooted words only for weight at key moments, not throughout.",
+  Nepali:"Natural spoken Nepali (Kathmandu-standard unless the Voice DNA below says otherwise), conversational, with English loanwords only where Nepali speakers normally use them."
+};
+
+const VL_LINES = [
+  "Hello friends, welcome back to the channel.",
+  "Today's story will give you goosebumps.",
+  "Nobody knew what was waiting for them in the dark.",
+  "It was the winter of 1959, and the snow would not stop.",
+  "Think about it for a second: what would you have done?",
+  "My grandmother used to tell me stories like this.",
+  "He was scared, but he didn't turn back.",
+  "The police found something nobody expected.",
+  "Honestly, I couldn't believe it either.",
+  "They had only three days of food left.",
+  "She waited for him every single evening.",
+  "This is the part where everything changes.",
+  "Let's go back a little, to where it all began.",
+  "If you liked this video, don't forget to subscribe.",
+  "Hurry up, we're getting late!",
+  "The whole village went silent.",
+  "Some say it was an accident. Others aren't so sure.",
+  "What happened next shocked the entire world.",
+  "Write in the comments where you're watching from.",
+  "See you in the next story. Take care."
+];
+
+const EXAMPLE = {"project":{"title":"Apollo 13: The Problem 320,000 km From Home","alt_titles":["Apollo 13: How Three Men Came Back","Houston, We've Had a Problem"],"logline":"An oxygen tank explodes on the way to the Moon, and three astronauts turn their landing craft into a lifeboat.","genre":"Survival","story_basis":"real","language":"English","script":"Latin","duration_target_sec":60,"aspect_ratio":"16:9","hook_line":"13 April 1970. More than 300,000 km from Earth, a bang shakes the spacecraft.","research_note":"EXAMPLE DATA for preview. Facts are well documented by NASA; verify against the sources before publishing."},
+"truth_ledger":[
+{"id":"F1","claim":"Apollo 13 launched on 11 April 1970 with Jim Lovell, Jack Swigert and Fred Haise.","status":"verified","sources":[{"name":"NASA, Apollo 13 mission overview"},{"name":"NASA Apollo 13 Mission Report (1970)"}]},
+{"id":"F2","claim":"About 56 hours into the flight, on 13 April 1970, oxygen tank No. 2 in the service module failed.","status":"verified","sources":[{"name":"Report of Apollo 13 Review Board (1970)"},{"name":"NASA Apollo 13 Mission Report (1970)"}]},
+{"id":"F3","claim":"Swigert radioed 'Houston, we've had a problem'; it is often misquoted as 'Houston, we have a problem'.","status":"verified","sources":[{"name":"Apollo 13 air-to-ground transcript, NASA"},{"name":"Apollo Lunar Surface Journal / NASA History Office"}]},
+{"id":"F4","claim":"The crew used the lunar module Aquarius as a lifeboat and adapted square CO2 scrubbers to fit round sockets.","status":"verified","sources":[{"name":"NASA Apollo 13 Mission Report (1970)"},{"name":"NASA History Office"}]},
+{"id":"F5","claim":"The crew splashed down safely in the South Pacific on 17 April 1970.","status":"verified","sources":[{"name":"NASA Apollo 13 Mission Report (1970)"},{"name":"NASA, Apollo 13 mission overview"}]}],
+"characters":[{"name":"Jim Lovell","visual_lock":"American man, 42, short brown hair, 1970 NASA white flight suit, calm focused eyes"},{"name":"Mission Control","visual_lock":"1970s NASA control room, rows of consoles, men in white shirts and narrow ties, cigarette haze"}],
+"music_palette":[{"cue":"M1","mood":"tense, hollow","style":"low synth drone with distant timpani","bpm":60,"where":"Scenes 1–2"},{"cue":"M2","mood":"hope rising","style":"strings swelling into brass","bpm":84,"where":"Scenes 3–4"}],
+"scenes":[
+{"id":1,"act":"Hook","title":"The Bang","start":"00:00","duration_sec":14,"voiceover":"13 April 1970. More than 300,000 kilometres from Earth, three men hear a bang. Then a voice on the radio: Houston, we've had a problem.","delivery":"low and slow; pause after 'a bang'","on_screen_text":"13 APRIL 1970","visual":{"description":"Dark capsule interior, amber warning lights flicker","comfyui_prompt":"cinematic photo, cramped 1970 Apollo command module interior, amber warning lights flickering, astronaut gloved hand on switch panel, dust particles floating, high contrast, film grain, 35mm","negative_prompt":"modern equipment, text, watermark, cartoon, extra fingers","shot":"close-up","camera":"slow push-in","motion_prompt":"lights flicker, floating dust drifts, subtle camera shake on the bang"},"sfx":["metallic bang","master alarm tone","radio static"],"music":{"cue":"M1","action":"start low under the static"},"transition":"hard cut to black","fact_ids":["F2","F3"],"dramatized":false},
+{"id":2,"act":"Setup","title":"Two Days Earlier","start":"00:14","duration_sec":14,"voiceover":"Two days earlier, Apollo 13 lifted off with Jim Lovell, Jack Swigert and Fred Haise. Their target: the Moon.","delivery":"warmer, a touch of pride","on_screen_text":"11 APRIL 1970 · LAUNCH","visual":{"description":"Saturn V rising on a column of fire at dawn","comfyui_prompt":"Saturn V rocket lifting off at dawn, huge column of fire and steam, archival 1970 film look, warm orange sky, wide shot, grain","negative_prompt":"modern rocket, logos, text, watermark","shot":"wide","camera":"locked-off, slight tilt up","motion_prompt":"rocket rises slowly, steam billows outward"},"sfx":["deep rocket rumble","crowd cheering, distant"],"music":{"cue":"M1","action":"lift slightly"},"transition":"match cut on the flame","fact_ids":["F1"],"dramatized":false},
+{"id":3,"act":"Turn","title":"The Lifeboat","start":"00:28","duration_sec":18,"voiceover":"With the main ship failing, they crowded into the lunar module, Aquarius, built for two men and two days. When the air began to turn toxic, engineers on Earth showed them how to make a square filter fit a round hole.","delivery":"faster, urgent, then slow down on 'square filter fit a round hole'","on_screen_text":"AQUARIUS: BUILT FOR 2 PEOPLE","visual":{"description":"Engineers dump parts on a table; astronauts tape a filter","comfyui_prompt":"1970 NASA engineers around a table covered with hoses, cardboard, plastic bags and duct tape, square CO2 canister, tense faces, documentary photo, warm tungsten light","negative_prompt":"modern clothing, smartphones, text, watermark","shot":"medium overhead","camera":"slow orbit","motion_prompt":"hands tape a hose to a square canister"},"sfx":["tape ripping","muffled radio chatter","breathing"],"music":{"cue":"M2","action":"enter softly"},"transition":"dissolve","fact_ids":["F4"],"dramatized":false},
+{"id":4,"act":"Resolution","title":"Splashdown","start":"00:46","duration_sec":14,"voiceover":"On 17 April, three parachutes opened over the Pacific. Apollo 13 never reached the Moon, but all three men came home.","delivery":"release, warm, let the last line breathe","on_screen_text":"17 APRIL 1970 · ALL THREE HOME","visual":{"description":"Capsule under three red-and-white parachutes over blue ocean","comfyui_prompt":"Apollo command module descending under three red and white parachutes over the Pacific ocean, bright morning sky, archival 1970 photo colours, wide shot","negative_prompt":"modern ships, text, watermark","shot":"wide","camera":"slow tilt down to the water","motion_prompt":"parachutes sway, capsule lowers toward the sea"},"sfx":["wind","splash","distant applause from Mission Control"],"music":{"cue":"M2","action":"swell to peak, then resolve"},"transition":"fade to white","fact_ids":["F5"],"dramatized":false}],
+"end_card":{"cta":"Subscribe for more true stories","next_tease":"Next: the Andes survivors of 1972"},
+"youtube":{"description":"How Apollo 13's crew survived an explosion on the way to the Moon.","chapters":["00:00 The Bang","00:14 Launch","00:28 The Lifeboat","00:46 Splashdown"],"tags":["Apollo 13","NASA","space history","survival story"]},
+"thumbnail_ideas":["Astronaut helmet reflecting a red warning light, text: 'WE'VE HAD A PROBLEM'"]};
+
+/* ============ STATE & STORAGE ============ */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ls = {
+  get(k, d){ try{ const v = localStorage.getItem("uscript."+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem("uscript."+k, JSON.stringify(v)); }catch(e){} }
+};
+/* CLOUD is set by the Firebase module when a user is signed in: {save(key,val), del(key), list()} */
+let CLOUD = null, FBUSER = null, AUTH = null, SAMPLE = null;
+let profile = ls.get("profile", null);
+let projects = ls.get("projects", {});
+let brief = ls.get("brief", null) || defaultBrief();
+let lastPrompt = ls.get("lastPrompt", "");
+let board = ls.get("board", null);
+let dnaPrompt = "";
+
+function defaultBrief(){
+  return {topic:"",genre:"",basis:"real",truth:true,depth:"standard",audience:"General audience",dur:"8",platform:"long",narrator:"Documentary narrator (third person)",hook:"Shocking verified fact",ending:"Twist or final reveal",intensity:3,series:"",lang:(profile&&profile.lang)||"Hinglish",script:"",voicestyle:"Warm and conversational",vstyle:"Cinematic photoreal",music:"Cinematic orchestral",pace:"auto",must:"",avoid:"",extras:["titles","thumb","desc","bible","broll"]};
+}
+function cloudSave(key, val){
+  if(!CLOUD) return Promise.resolve(false);
+  return CLOUD.save(key, JSON.parse(JSON.stringify(val))).then(()=>true).catch(err=>{ console.warn("Cloud save failed", err); return false; });
+}
+function cloudDelete(key){ if(CLOUD) CLOUD.del(key).catch(()=>{}); }
+function saveProfile(){
+  profile.updatedAt = Date.now();
+  ls.set("profile", profile);
+  return cloudSave("profile", profile);
+}
+function saveProject(p){
+  projects[p.id] = p; ls.set("projects", projects);
+  return cloudSave(p.id, p);
+}
+
+/* ============ UI HELPERS ============ */
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); return true; }catch(e){ return false; }
+}
+function showModal(title, text){ $("#modal-t").textContent=title; $("#modal-text").value=text; $("#modal").hidden=false; }
+$("#modal-x").onclick=()=>{$("#modal").hidden=true};
+$("#modal").addEventListener("click",e=>{ if(e.target.id==="modal") $("#modal").hidden=true; });
+$("#modal-copy").onclick=async()=>{ const ok=await copyText($("#modal-text").value); if(!ok){ $("#modal-text").select(); toast("Selected — press Ctrl/Cmd+C"); } else toast("Copied"); };
+function download(filename, text){
+  try{
+    const blob = new Blob([text], {type: filename.endsWith(".json") ? "application/json" : "text/markdown;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    toast("Downloaded "+filename);
+  }catch(e){ showModal(filename, text); }
+}
+const slug = s => (s||"script").toLowerCase().replace(/[^a-z0-9ऀ-ॿ؀-ۿ]+/g,"-").replace(/^-|-$/g,"").slice(0,48) || "script";
+const fmt = sec => { sec=Math.max(0,Math.round(sec)); return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0"); };
+
+/* ============ ROUTING ============ */
+const VIEWS=["landing","studio","board","voice","library"];
+function go(v){
+  if(!profile && v!=="landing") v="landing";
+  VIEWS.forEach(x=>{ $("#v-"+x).hidden = x!==v; });
+  $$("#nav button").forEach(b=>b.setAttribute("aria-current", b.dataset.go===v?"page":"false"));
+  $("#nav").hidden = !profile; $("#userchip").hidden = !profile;
+  if(v==="voice") renderVoice();
+  if(v==="library") renderLibrary();
+  if(v==="board") renderBoard();
+  if(v==="studio") renderStudio();
+  ls.set("view", v);
+  window.scrollTo({top:0});
+}
+$$("#nav button").forEach(b=>b.onclick=()=>go(b.dataset.go));
+$("#brand").onclick=()=>go(profile?"studio":"landing");
+$("#userchip").onclick=()=>go("library");
+function paintUser(){
+  if(!profile) return;
+  $("#uname").textContent = profile.name || "You";
+  const av = $("#avatar"), ph = FBUSER && FBUSER.photo;
+  if(ph) av.innerHTML = `<img src="${esc(ph)}" referrerpolicy="no-referrer" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+  else av.textContent = (profile.name||"U").trim().charAt(0).toUpperCase();
+}
+
+/* ============ AUTH (Firebase, wired up by the module script at the bottom) ============ */
+function paintAuth(){
+  const hasFb = !!AUTH;
+  $("#si-google").hidden = !hasFb || !!FBUSER;
+  $("#si-or").hidden = !!FBUSER || !hasFb;
+  $("#pf-google").hidden = !hasFb || !!FBUSER;
+  $("#pf-signout").hidden = !FBUSER;
+  if(FBUSER){
+    $("#si-title").textContent = profile ? "Welcome back, "+(profile.name||FBUSER.name) : "Finish your profile";
+    $("#si-acct").textContent = "Signed in as "+(FBUSER.email||FBUSER.name)+". Your profile, Voice DNA and scripts sync across devices.";
+    $("#si-go").textContent = profile ? "Continue to the studio" : "Create my profile";
+    $("#si-sync").textContent = "Synced to your Google account.";
+  } else {
+    $("#si-title").textContent = profile ? "Welcome back, "+(profile.name||"") : (hasFb ? "Sign in or register" : "Create your writer profile");
+    $("#si-acct").textContent = hasFb ? "New here? Signing in with Google creates your account automatically." : (window.USCRIPT_FB_STATUS||"");
+    $("#si-go").textContent = profile ? "Continue to the studio" : "Enter the studio";
+    $("#si-sync").textContent = "Saved in this browser.";
+  }
+}
+async function googleSignIn(){
+  if(!AUTH) return;
+  try{ await AUTH.signIn(); }
+  catch(e){
+    const code = e && e.code || "";
+    toast(code==="auth/popup-closed-by-user" ? "Sign-in cancelled"
+      : code==="auth/unauthorized-domain" ? "This website isn't on Firebase's authorised domains list yet (see README step 3)."
+      : "Google sign-in failed: "+(e.message||code));
+  }
+}
+$("#si-google").onclick = googleSignIn;
+$("#pf-google").onclick = googleSignIn;
+$("#pf-signout").onclick = async()=>{
+  if(!AUTH) return;
+  await AUTH.signOut();
+  // Your data stays safe in the cloud; clear this browser's copy so the next person sees a clean app.
+  ["profile","projects","board","brief","lastPrompt","currentId"].forEach(k=>{ try{ localStorage.removeItem("uscript."+k); }catch(e){} });
+  profile=null; projects={}; board=null; lastPrompt=""; currentId=null; brief=defaultBrief();
+  $("#paste").value=""; $("#prompt-out").hidden=true; $("#si-name").value=""; $("#si-channel").value="";
+  paintAuth(); go("landing"); toast("Signed out");
+};
+window.USCRIPT = {
+  ready(api){ AUTH = api; paintAuth(); },
+  noFirebase(msg){ AUTH = null; window.USCRIPT_FB_STATUS = msg||""; paintAuth(); },
+  async onAuth(user, cloud){
+    FBUSER = user; CLOUD = user ? cloud : null;
+    if(!user){ paintAuth(); return; }
+    try{
+      const items = await cloud.list();
+      let remoteProfile = null;
+      items.forEach(({id,data})=>{
+        if(id==="profile") remoteProfile = data;
+        else if(id.startsWith("proj_")){ const loc=projects[id]; if(!loc || (data.updatedAt||data.createdAt||0) >= (loc.updatedAt||loc.createdAt||0)) projects[id]=data; }
+      });
+      Object.values(projects).forEach(p=>{ if(!items.find(i=>i.id===p.id)) cloudSave(p.id,p); });
+      ls.set("projects", projects);
+      if(remoteProfile && (!profile || (remoteProfile.updatedAt||0) >= (profile.updatedAt||0))){ profile = remoteProfile; ls.set("profile", profile); }
+      else if(profile){ await saveProfile(); }
+    }catch(e){ console.warn(e); toast("Couldn't reach your cloud profile. Working from this browser for now."); }
+    if(!profile && !$("#si-name").value) $("#si-name").value = (user.name||"").split(" ")[0];
+    boot();
+    if(profile) toast("Signed in as "+(user.email||user.name));
+  }
+};
+
+/* ============ SIGN IN ============ */
+$("#si-go").onclick=async()=>{
+  const name=$("#si-name").value.trim(), channel=$("#si-channel").value.trim();
+  if(!name){ $("#si-name").focus(); toast("Add your name to continue"); return; }
+  profile = Object.assign({voices:{}}, profile||{}, {name, channel, lang:$("#si-lang").value, createdAt:(profile&&profile.createdAt)||Date.now()});
+  brief.lang = profile.lang; brief.script="";
+  await saveProfile(); paintUser(); go("studio");
+  toast("Welcome, "+name+"!");
+};
+
+/* ============ STUDIO ============ */
+function renderStudio(){
+  const g=$("#genres");
+  if(!g.children.length){
+    g.innerHTML = Object.entries(GENRES).map(([k,v])=>`<button class="chip" data-g="${k}" aria-pressed="false"><span class="dot" style="background:${v.color}"></span>${esc(v.label)}</button>`).join("");
+    g.onclick=e=>{ const b=e.target.closest("[data-g]"); if(!b) return; brief.genre = brief.genre===b.dataset.g?"":b.dataset.g; if(brief.genre){ brief.basis=GENRES[brief.genre].basis; brief.truth = brief.basis==="real"; } syncStudio(); };
+    $("#durations").innerHTML = DURATIONS.map(([v,l])=>`<button class="chip" data-d="${v}" aria-pressed="false">${l}</button>`).join("");
+    $("#durations").onclick=e=>{ const b=e.target.closest("[data-d]"); if(!b) return; brief.dur=b.dataset.d; if(+brief.dur<=1) brief.platform="short"; else if(brief.platform==="short") brief.platform="long"; syncStudio(); };
+  }
+  syncStudio();
+}
+const FIELDS=["topic","basis","depth","audience","platform","narrator","hook","ending","series","lang","script","voicestyle","vstyle","music","pace","must","avoid"];
+function fillScripts(){
+  const opts=SCRIPTS[brief.lang]||["Latin"];
+  if(!opts.includes(brief.script)) brief.script = (profile&&profile.voices&&profile.voices[brief.lang]&&profile.voices[brief.lang].script&&opts.includes(profile.voices[brief.lang].script))?profile.voices[brief.lang].script:opts[0];
+  $("#script").innerHTML = opts.map(o=>`<option${o===brief.script?" selected":""}>${esc(o)}</option>`).join("");
+}
+function syncStudio(){
+  fillScripts();
+  FIELDS.forEach(f=>{ const el=$("#"+f); if(el && el.value!==brief[f]) el.value=brief[f]??""; });
+  $("#intensity").value=brief.intensity; $("#int-v").textContent=brief.intensity+" / 5";
+  $$("#genres .chip").forEach(c=>c.setAttribute("aria-pressed", c.dataset.g===brief.genre));
+  $$("#durations .chip").forEach(c=>c.setAttribute("aria-pressed", c.dataset.d===brief.dur));
+  $$("#extras input").forEach(i=>i.checked=brief.extras.includes(i.value));
+  // truth lock
+  const forced = brief.basis==="real";
+  if(forced) brief.truth=true;
+  $("#truth").checked=brief.truth; $("#truth").disabled=forced;
+  $("#truthbox").classList.toggle("off", !brief.truth);
+  $("#truth-title").textContent = brief.truth ? "Truth Lock is ON" : "Truth Lock is off";
+  $("#truth-desc").textContent = forced
+    ? "Real events: the AI must research first, back every fact with "+(brief.depth==="deep"?"3":"2")+" independent sources, list them in a truth ledger, and cut anything it can't verify. Locked on for real stories."
+    : brief.truth ? "Any real-world detail (places, history, science) used for texture must still be verified."
+    : (brief.basis==="legend" ? "Legend mode: the story is told as legend, never as fact." : "Fiction mode: invented freely, never attached to real people or real tragedies.");
+  // duration meta
+  const sec = +brief.dur*60, words = Math.round(+brief.dur*WPM[brief.lang]);
+  const sl = sceneLen(); const n=Math.max(3,Math.round(sec/sl));
+  $("#dur-meta").textContent = `≈ ${words.toLocaleString()} spoken words in ${brief.lang} · about ${n} scenes of ~${sl}s · ${brief.platform==="short"?"9:16 vertical":brief.platform==="podcast"?"audio only":"16:9"}`;
+  // dna note
+  const v = profile&&profile.voices&&profile.voices[brief.lang];
+  $("#dna-note").innerHTML = v&&v.dna
+    ? `<b>Your ${esc(brief.lang)} Voice DNA will be added</b>, plus 4 of your own lines as anchors. <label style="display:inline-flex;gap:6px;align-items:center;margin-left:8px;font-weight:600"><input type="checkbox" id="use-dna" ${brief.useDna!==false?"checked":""} style="accent-color:var(--purple)"> Use it</label>`
+    : `No ${esc(brief.lang)} Voice DNA yet. <button class="btn small ghost" id="goto-voice" style="margin-left:6px">Take the 20-line Voice Lab test</button> so scripts sound like you.`;
+  const gv=$("#goto-voice"); if(gv) gv.onclick=()=>{ $("#vl-lang").value=brief.lang; go("voice"); };
+  const ud=$("#use-dna"); if(ud) ud.onchange=()=>{ brief.useDna=ud.checked; persistBrief(); };
+  const ready = brief.topic.trim() && brief.genre;
+  $("#generate").disabled=!ready;
+  $("#gen-hint").textContent = ready ? "Builds a complete, research-first brief for your AI." : (!brief.topic.trim()&&!brief.genre ? "Pick a topic and a genre to unlock." : !brief.topic.trim() ? "Add a topic, or hit Amaze me." : "Pick a genre.");
+  if(lastPrompt){ $("#prompt-out").hidden=false; $("#prompt-box").textContent=lastPrompt; }
+  persistBrief();
+}
+function sceneLen(){
+  const p = brief.pace!=="auto" ? brief.pace : (brief.genre?GENRES[brief.genre].pace:"medium");
+  if(brief.platform==="short") return 5;
+  return {fast:7,medium:11,slow:16}[p];
+}
+function persistBrief(){ ls.set("brief", brief); }
+FIELDS.forEach(f=>{ const el=$("#"+f); if(!el) return; el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{ brief[f]=el.value; if(f==="lang") brief.script=""; if(f==="basis"){ brief.truth = brief.basis==="real" ? true : brief.truth; } syncStudio(); }); });
+$("#intensity").oninput=e=>{ brief.intensity=+e.target.value; $("#int-v").textContent=brief.intensity+" / 5"; persistBrief(); };
+$("#truth").onchange=e=>{ brief.truth=e.target.checked; syncStudio(); };
+$("#extras").onchange=()=>{ brief.extras=$$("#extras input:checked").map(i=>i.value); persistBrief(); };
+$("#amaze").onclick=()=>{
+  const keys = brief.genre ? [brief.genre] : Object.keys(AMAZE);
+  const g = keys[Math.floor(Math.random()*keys.length)];
+  const list = AMAZE[g].filter(t=>t!==brief.topic);
+  brief.topic = list[Math.floor(Math.random()*list.length)];
+  brief.genre = g; brief.basis = GENRES[g].basis; brief.truth = brief.basis==="real";
+  $("#topic").value=brief.topic; syncStudio(); toast("Amazed: "+brief.topic);
+};
+$("#reset-brief").onclick=()=>{ brief=defaultBrief(); lastPrompt=""; ls.set("lastPrompt",""); $("#prompt-out").hidden=true; syncStudio(); toast("Fresh brief"); };
+
+/* ============ PROMPT ENGINE ============ */
+const FENCE = "```";
+function beats(sec){
+  if(sec<=90) return [["Hook (scroll-stopper)",0,.08],["Context in one breath",.08,.3],["Escalation",.3,.7],["Payoff / reveal",.7,.92],["Loop line or CTA",.92,1]];
+  return [["Hook",0,.07],["Setup: world, people, stakes",.07,.2],["Rising action",.2,.5],["Turning point",.5,.6],["Climax",.6,.85],["Resolution",.85,.95],["Outro & call to action",.95,1]];
+}
+function buildPrompt(){
+  const b=brief, g=GENRES[b.genre], sec=Math.round(+b.dur*60), wpm=WPM[b.lang], words=Math.round(+b.dur*wpm), sl=sceneLen(), n=Math.max(3,Math.round(sec/sl));
+  const aspect = b.platform==="short"?"9:16 vertical":b.platform==="podcast"?"audio-first (visuals optional, still provide them for a lyric/visualiser video)":"16:9";
+  const platform = {long:"YouTube long-form",short:"YouTube Shorts / Instagram Reels / TikTok",podcast:"Podcast / audio story"}[b.platform];
+  const v = profile&&profile.voices&&profile.voices[b.lang];
+  const useDna = v&&v.dna&&b.useDna!==false;
+  const L=[];
+  L.push(`# U-SCRIPT BRIEF: ${b.topic}`);
+  L.push(`Channel: ${profile.channel||profile.name} · Writer: ${profile.name}`);
+  L.push("");
+  L.push("You are a team of two working as one:");
+  L.push("1. THE RESEARCHER: an investigative journalist and fact-checker. Nothing enters the script unless it is verified.");
+  L.push("2. THE STORYTELLER: an Oscar-winning screenwriter who turns real events into scripts people cannot stop watching.");
+  L.push("The Researcher has the final word on facts. The Storyteller has the final word on how it feels. If drama and accuracy ever conflict, accuracy wins and the Storyteller finds another way to make it gripping.");
+  L.push("");
+  L.push("## 1. The brief");
+  [["Topic",b.topic],["Genre",g.label],["Story basis",{real:"Real events (factual)",legend:"Legend / folklore",fiction:"Original fiction"}[b.basis]],["Platform",platform+" · "+aspect],
+   ["Target length",`${fmt(sec)} (${sec} seconds) → about ${words} spoken words at ~${wpm} words/min, about ${n} scenes of ~${sl} s`],
+   ["Narration language",`${b.lang}, written in ${b.script}`],["Narrator",b.narrator],["Voice style",b.voicestyle],["Audience",b.audience],
+   ["Opening hook",b.hook],["Ending",b.ending],["Intensity",`${b.intensity}/5`],["Series",b.series||"Standalone"],
+   ["Visual style (for ComfyUI)",b.vstyle],["Music direction",b.music],["Must include",b.must||"—"],["Avoid",b.avoid||"—"]
+  ].forEach(([k,val])=>L.push(`- ${k}: ${val}`));
+  L.push("");
+  L.push("## 2. Truth protocol");
+  if(b.basis==="real"){
+    const k = b.depth==="deep"?3:2;
+    L.push("This is a factual video. The standard is 100% accurate, not 99%. Take extra time on research; never trade truth for drama.");
+    L.push(`1. Research BEFORE writing. Use web search/browsing if you have it. Prefer primary and authoritative sources: official records, court documents, government and agency archives, peer-reviewed papers, museums and universities, established news organisations. Use Wikipedia only as a map to primary sources.`);
+    L.push(`2. Every factual claim (names, dates, times, numbers, places, quotes, causes) must be listed in "truth_ledger" with at least ${k} independent reliable sources.`);
+    L.push("3. If you cannot verify a claim, leave it out. If something is genuinely disputed, say so in the narration (\"historians disagree…\") and mark it \"disputed\".");
+    L.push("4. Never invent quotes, dialogue, inner thoughts or scenes and present them as real. Any dramatised reconstruction gets \"dramatized\": true and the narration signals it (\"imagine…\", \"we can picture…\").");
+    L.push("5. Do not round up or exaggerate numbers for effect. Give ranges where sources differ.");
+    L.push("6. Common myths and misquotes: if the popular version is wrong, use the correct version and, if it helps the story, point out the myth.");
+    L.push("7. If you do NOT have web access, say so in project.research_note, mark uncertain claims \"needs_verification\" instead of guessing, and never make up URLs.");
+    L.push("8. Before replying, re-read the script line by line and check every fact against the ledger. Every scene lists the ledger IDs it relies on in \"fact_ids\".");
+  } else if(b.basis==="legend"){
+    L.push("This is a legend or folklore story. Present it as legend in the narration (\"it is said\", \"according to the tradition\"), never as historical fact. Name the source text/tradition and note where regional versions differ. Any real history, geography or dates mentioned for context must be accurate and listed in \"truth_ledger\" with status \"verified\"; the legend itself is listed with status \"legend\".");
+  } else {
+    L.push("This is original fiction. Invent freely, but never attach invented events to real named people or real tragedies. "+(b.truth?"Any real-world detail used for texture (places, science, history) must be accurate and listed in \"truth_ledger\".":"Keep real-world texture plausible. Add a one-line fiction disclaimer in the description."));
+  }
+  L.push("");
+  L.push(`## 3. Genre craft: ${g.label}`);
+  g.craft.forEach(c=>L.push("- "+c));
+  L.push(`- Intensity ${b.intensity}/5: ${["very gentle and calm","gentle, low tension","balanced tension and warmth","high tension, strong emotional peaks","maximum tension, relentless pace (still within the audience rating)"][b.intensity-1]}.`);
+  L.push("");
+  L.push("## 4. Story architecture (timings are targets)");
+  beats(sec).forEach(([name,a,z])=>L.push(`- ${fmt(sec*a)}–${fmt(sec*z)} · ${name}`));
+  L.push(`- Hook style: ${b.hook}. The first line must make it impossible to scroll away.`);
+  L.push(`- Ending style: ${b.ending}.`);
+  L.push("- Every scene must move the story forward or raise a question. Cut anything that does neither.");
+  L.push("- Write for the ear: one idea per sentence, vary sentence length, use pauses deliberately.");
+  L.push("");
+  L.push("## 5. Language & voice");
+  L.push(LANG_RULES[b.lang]);
+  L.push(`- Write ALL voiceover and on-screen text in ${b.lang}, ${b.script}. Write numbers and dates the way the narrator would say them out loud.`);
+  L.push("- Keep proper names, places and dates exactly accurate; spell names consistently.");
+  L.push(`- Narrator: ${b.narrator}. Voice: ${b.voicestyle}. Add delivery notes (pace, pauses, emphasis, whisper/rise) for each scene.`);
+  if(useDna){
+    L.push("");
+    L.push(`### Voice DNA of ${profile.name} (${b.lang}). Follow this closely; the script must sound like this person.`);
+    L.push(v.dna.trim());
+    const anchors = (v.answers||[]).map((a,i)=>[VL_LINES[i],a]).filter(x=>x[1]&&x[1].trim()).slice(0,4);
+    if(anchors.length){ L.push(""); L.push("Real lines from the narrator (match this wording, rhythm and code-mixing):"); anchors.forEach(([en,a])=>L.push(`- "${en}" → "${a.trim()}"`)); }
+  }
+  L.push("");
+  L.push("## 6. Visuals, music and sound (for ComfyUI production)");
+  L.push(`- Visual style for every scene: ${b.vstyle}. Aspect ratio ${b.platform==="short"?"9:16":"16:9"}.`);
+  L.push("- \"comfyui_prompt\" is ALWAYS in English, comma-separated, image-model style: subject, action, setting, era details, lighting, lens/shot, mood, style keywords. 25–60 words. No text or logos in the image.");
+  L.push("- \"negative_prompt\" in English: what must not appear (anachronisms, modern objects, text, watermark, extra fingers, etc.).");
+  if(b.extras.includes("bible")) L.push("- Create a \"characters\" list with a fixed \"visual_lock\" description for each recurring person/place. Copy the exact visual_lock words into every comfyui_prompt where they appear, so faces and places stay consistent. For real people, describe period-accurate clothing and age; do not claim exact likeness.");
+  if(b.extras.includes("broll")) L.push("- Add \"motion_prompt\" per scene for image-to-video: what moves and how the camera moves, one sentence.");
+  L.push(`- Music: ${b.music}. Define 2–5 reusable music cues in "music_palette" (mood, style, instruments, BPM) and reference them per scene with an action (start, swell, drop out, hit, fade). Describe styles only; do not name copyrighted songs.`);
+  L.push("- Sound effects: 1–4 concrete, searchable SFX per scene (e.g. \"wooden door creak, slow\"). Use silence as a deliberate effect where it helps.");
+  L.push("");
+  L.push("## 7. Work in this order");
+  L.push("1. Research and build the truth ledger.");
+  L.push("2. Outline the beats against the timings above.");
+  L.push("3. Write the voiceover, reading it aloud in your head for rhythm.");
+  L.push("4. Direct each scene: visuals, camera, music, SFX, on-screen text.");
+  L.push(`5. Check: total voiceover ≈ ${words} words (±10%); scene durations add up to ≈ ${sec} s; every fact is in the ledger; no invented quotes; JSON is valid.`);
+  L.push("");
+  L.push("## 8. Output format");
+  L.push(`Reply with exactly ONE ${FENCE}json code block containing valid JSON (double quotes, no comments, no trailing commas) and nothing else. Use this structure:`);
+  const schema = {
+    project:{title:"",alt_titles:b.extras.includes("titles")?["4 more titles"]:[],logline:"",genre:g.label,story_basis:b.basis,language:b.lang,script:b.script,duration_target_sec:sec,aspect_ratio:b.platform==="short"?"9:16":"16:9",hook_line:"",research_note:"how research was done; say if you had no web access"},
+    truth_ledger:[{id:"F1",claim:"",status:"verified | disputed | needs_verification | legend",sources:[{name:"",url:"only real URLs you actually used"}]}],
+    characters:b.extras.includes("bible")?[{name:"",visual_lock:""}]:[],
+    music_palette:[{cue:"M1",mood:"",style:"",bpm:0,where:"Scenes 1–3"}],
+    scenes:[{id:1,act:"Hook",title:"",start:"00:00",duration_sec:0,voiceover:"",delivery:"",on_screen_text:"",
+      visual:Object.assign({description:"",comfyui_prompt:"",negative_prompt:"",shot:"wide | medium | close-up | extreme close-up | aerial",camera:""},b.extras.includes("broll")?{motion_prompt:""}:{}),
+      sfx:[""],music:{cue:"M1",action:""},transition:"",fact_ids:["F1"],dramatized:false}],
+    end_card:{cta:"",next_tease:""}
+  };
+  if(b.extras.includes("desc")) schema.youtube={description:"",chapters:["00:00 …"],tags:[""]};
+  if(b.extras.includes("thumb")) schema.thumbnail_ideas=["visual idea + 2–4 word text overlay"];
+  L.push(FENCE+"json"); L.push(JSON.stringify(schema,null,2)); L.push(FENCE);
+  L.push(`Give all ${n} or so scenes in full. Do not shorten, summarise or leave placeholders.`);
+  return L.join("\n");
+}
+$("#generate").onclick=()=>{
+  lastPrompt = buildPrompt(); ls.set("lastPrompt", lastPrompt);
+  $("#prompt-out").hidden=false; $("#prompt-box").textContent=lastPrompt;
+  $("#prompt-out").scrollIntoView({behavior:"smooth",block:"start"});
+  toast("Prompt ready · "+lastPrompt.split(/\s+/).length+" words");
+};
+$("#copy-prompt").onclick=async()=>{ if(await copyText(lastPrompt)) toast("Prompt copied"); else showModal("Prompt", lastPrompt); };
+$("#dl-prompt").onclick=()=>download(slug(brief.topic)+"_prompt.md", lastPrompt);
+$("#save-brief").onclick=async()=>{
+  const id="proj_"+Date.now().toString(36);
+  const ok = await saveProject({id, title:brief.topic, genre:GENRES[brief.genre].label, lang:brief.lang, createdAt:Date.now(), brief:{...brief}, prompt:lastPrompt, result:""});
+  currentId=id; ls.set("currentId",id);
+  toast(ok?"Saved to your library (synced)":"Saved to your library on this device");
+};
+document.addEventListener("click", async e=>{
+  const a = e.target.closest("a.ai"); if(!a) return;
+  const text = a.dataset.src==="dna" ? dnaPrompt : lastPrompt;
+  if(!text){ e.preventDefault(); toast(a.dataset.src==="dna"?"Generate the Voice DNA prompt first":"Generate the prompt first"); return; }
+  const ok = await copyText(text);
+  toast(ok ? "Copied! Paste it into "+a.dataset.ai : "Copy the prompt with the Copy button first");
+});
+$("#to-board").onclick=()=>go("board");
+$("#run-here").onclick=async()=>{
+  if(!SAMPLE) return;
+  go("board");
+  const ta=$("#paste"), msg=$("#parse-msg");
+  ta.value=""; msg.textContent="Claude is writing… (no web access here, so verify the truth ledger before publishing)";
+  $("#build").disabled=true;
+  try{
+    const res = await SAMPLE(lastPrompt, {modelTier:"complex", cache:false, onText:u=>{ ta.value=u.text; ta.scrollTop=ta.scrollHeight; }});
+    ta.value=res.text; msg.textContent=""; $("#build").disabled=false; buildFromPaste();
+  }catch(err){
+    $("#build").disabled=false;
+    msg.textContent = err&&err.code==="rate_limited" ? "Too many requests just now. Wait a minute and try again." : err&&err.code==="not_granted" ? "Claude access wasn't allowed for this page. Use the AI buttons instead." : "Couldn't finish writing here. Use one of the AI buttons instead.";
+    if(err&&err.text) ta.value=err.text;
+  }
+};
+
+/* ============ SCENE BOARD ============ */
+let currentId = ls.get("currentId", null);
+function parseResult(raw){
+  let s = String(raw||"").trim();
+  const m = s.match(/```(?:json)?\s*([\s\S]*?)```/i); if(m) s=m[1];
+  const a=s.indexOf("{"), z=s.lastIndexOf("}");
+  if(a<0||z<a) throw new Error("No JSON object found. Make sure you pasted the whole reply, including the { and } braces.");
+  s=s.slice(a,z+1);
+  try{ return JSON.parse(s); }catch(e){
+    const fixed = s.replace(/,\s*([}\]])/g,"$1").replace(/[“”]/g,'"');
+    try{ return JSON.parse(fixed); }catch(e2){ throw new Error("The JSON is incomplete or broken ("+e2.message+"). If the AI cut off, ask it: \"continue the JSON exactly where you stopped\" and paste both parts together."); }
+  }
+}
+function normalize(d){
+  d.project=d.project||{}; d.scenes=Array.isArray(d.scenes)?d.scenes:[]; d.truth_ledger=d.truth_ledger||[]; d.music_palette=d.music_palette||[]; d.characters=d.characters||[];
+  let t=0; d.scenes.forEach((s,i)=>{ s.id=s.id??i+1; s.visual=s.visual||{}; s.sfx=Array.isArray(s.sfx)?s.sfx:(s.sfx?[s.sfx]:[]); s.duration_sec=+s.duration_sec||0; if(!s.start) s.start=fmt(t); t+=s.duration_sec; });
+  d._total=t; d._words=d.scenes.reduce((n,s)=>n+String(s.voiceover||"").trim().split(/\s+/).filter(Boolean).length,0);
+  return d;
+}
+function buildFromPaste(){
+  const msg=$("#parse-msg");
+  try{
+    const d=normalize(parseResult($("#paste").value));
+    if(!d.scenes.length) throw new Error("Found JSON, but it has no \"scenes\" list.");
+    board={raw:$("#paste").value, data:d, example:false}; ls.set("board",board);
+    msg.textContent=""; renderBoard(); toast(d.scenes.length+" scenes built");
+  }catch(e){ msg.innerHTML=`<span style="color:var(--bad)">${esc(e.message)}</span>`; }
+}
+$("#build").onclick=buildFromPaste;
+$("#load-example").onclick=()=>{ board={raw:JSON.stringify(EXAMPLE,null,2), data:normalize(JSON.parse(JSON.stringify(EXAMPLE))), example:true}; $("#paste").value=board.raw; ls.set("board",board); renderBoard(); };
+$("#clear-board").onclick=()=>{ board=null; ls.set("board",null); $("#paste").value=""; renderBoard(); };
+
+function renderBoard(){
+  const out=$("#board-out");
+  if(!board){ $("#board-title").textContent="Paste the AI's answer"; $("#paste-panel").hidden=false;
+    out.innerHTML=`<div class="empty" style="margin-top:16px"><h3>No scenes yet</h3><p class="muted">Paste the JSON your AI returned, or load the example to see how a finished board looks.</p></div>`; return; }
+  const d=board.data, p=d.project, rtl = /urdu \(nastaliq\)|^urdu$/i.test(p.script||"") || (p.language==="Urdu" && !/roman/i.test(p.script||""));
+  $("#board-title").textContent = p.title || "Untitled script";
+  if(!$("#paste").value) $("#paste").value=board.raw||"";
+  const counts={}; d.truth_ledger.forEach(f=>{ counts[f.status]=(counts[f.status]||0)+1; });
+  const unverified = (counts.needs_verification||0)+(counts.disputed||0);
+  out.innerHTML = `
+  ${board.example?`<p class="note" style="margin-bottom:14px">Example board (Apollo 13, 60 seconds). Paste your own AI result above to replace it.</p>`:""}
+  <div class="summary">
+    <div class="panel">
+      <p class="eyebrow">${esc(p.genre||"")} · ${esc(p.language||"")} ${p.script?"· "+esc(p.script):""} · ${esc(p.aspect_ratio||"")}</p>
+      <p style="font-size:1.05rem">${esc(p.logline||"")}</p>
+      ${p.hook_line?`<p class="muted"><b>Hook:</b> ${esc(p.hook_line)}</p>`:""}
+      <div class="stats">
+        <div class="stat"><b>${d.scenes.length}</b><span>Scenes</span></div>
+        <div class="stat"><b>${fmt(d._total)}</b><span>Runtime</span></div>
+        <div class="stat"><b>${d._words.toLocaleString()}</b><span>VO words</span></div>
+        <div class="stat"><b style="color:${unverified?"var(--warn)":"var(--ok)"}">${d.truth_ledger.length}</b><span>Facts logged</span></div>
+      </div>
+      ${p.research_note?`<p class="note"><b>Research note:</b> ${esc(p.research_note)}</p>`:""}
+      ${unverified?`<p class="note" style="background:var(--warn-bg);color:var(--warn)"><b>${unverified} fact${unverified>1?"s":""} not fully verified.</b> Check them in the truth ledger below before recording.</p>`:""}
+    </div>
+    <div class="panel">
+      <h3>Download & save</h3>
+      <div class="exports">
+        <button class="btn small primary" data-x="vo">Voiceover .md</button>
+        <button class="btn small" data-x="vis">Visuals (ComfyUI) .md</button>
+        <button class="btn small" data-x="music">Music .md</button>
+        <button class="btn small" data-x="sfx">Sound effects .md</button>
+        <button class="btn small" data-x="full">Full script .md</button>
+        <button class="btn small ghost" data-x="json">Project .json</button>
+      </div>
+      <button class="btn purple" id="save-board">Save to library</button>
+    </div>
+  </div>
+
+  ${d.truth_ledger.length?`<div class="panel" style="margin-top:16px"><h3>Truth ledger</h3><div class="tablewrap"><table><thead><tr><th>ID</th><th>Claim</th><th>Status</th><th>Sources</th></tr></thead><tbody>
+    ${d.truth_ledger.map(f=>`<tr><td class="mono">${esc(f.id)}</td><td>${esc(f.claim)}</td><td><span class="pill ${esc(String(f.status||"").replace(/\s+/g,"_"))}">${esc(f.status||"—")}</span></td><td>${(f.sources||[]).map(s=>s.url&&/^https?:\/\//.test(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name||s.url)}</a>`:esc(s.name||"")).join("<br>")}</td></tr>`).join("")}
+  </tbody></table></div></div>`:""}
+
+  ${(d.characters.length||d.music_palette.length)?`<div class="summary" style="margin-top:16px">
+    <div class="panel"><h3>Character & location bible</h3>${d.characters.length?d.characters.map(c=>`<div><b>${esc(c.name)}</b><div class="cprompt" style="margin-top:4px">${esc(c.visual_lock)}</div></div>`).join(""):'<p class="muted">None in this script.</p>'}</div>
+    <div class="panel"><h3>Music palette</h3>${d.music_palette.map(m=>`<div><span class="pill verified">${esc(m.cue)}</span> <b>${esc(m.mood)}</b> <span class="muted">· ${esc(m.style)}${m.bpm?" · "+esc(m.bpm)+" BPM":""}${m.where?" · "+esc(m.where):""}</span></div>`).join("")||'<p class="muted">No cues listed.</p>'}</div>
+  </div>`:""}
+
+  <div class="scenes" style="margin-top:16px">
+  ${d.scenes.map((s,i)=>`<article class="scene">
+    <div class="tc"><b>${String(s.id).padStart(2,"0")}</b><span>${esc(s.start)}</span><span>${s.duration_sec?esc(s.duration_sec)+"s":""}</span><em>${esc(s.act||"")}</em></div>
+    <div class="col">
+      <div class="scene-h"><h3>${esc(s.title||"Scene "+s.id)}</h3><button class="btn small ghost" data-copy="vo" data-i="${i}">Copy VO</button></div>
+      <span class="lbl vo">Voiceover</span>
+      <div class="vo-text" ${rtl?'dir="rtl"':""}>${esc(s.voiceover)}</div>
+      ${s.delivery?`<div class="delivery">${esc(s.delivery)}</div>`:""}
+      ${s.on_screen_text?`<div><span class="lbl">On screen</span><div style="font-weight:700">${esc(s.on_screen_text)}</div></div>`:""}
+      <div class="tags">${(s.fact_ids||[]).map(f=>`<span class="tag mono">${esc(f)}</span>`).join("")}${s.dramatized?`<span class="pill dramatized">dramatized</span>`:""}</div>
+    </div>
+    <div class="col">
+      <div class="scene-h"><span class="lbl vis">Visual · ${esc(s.visual.shot||"")} ${s.visual.camera?"· "+esc(s.visual.camera):""}</span><button class="btn small ghost" data-copy="cp" data-i="${i}">Copy prompt</button></div>
+      ${s.visual.description?`<div>${esc(s.visual.description)}</div>`:""}
+      ${s.visual.comfyui_prompt?`<div class="cprompt">${esc(s.visual.comfyui_prompt)}</div>`:""}
+      ${s.visual.negative_prompt?`<div class="cprompt" style="opacity:.75"><b>neg:</b> ${esc(s.visual.negative_prompt)}</div>`:""}
+      ${s.visual.motion_prompt?`<div class="muted" style="font-size:.85rem"><b>Motion:</b> ${esc(s.visual.motion_prompt)}</div>`:""}
+      ${s.sfx.length?`<div><span class="lbl sfx">Sound effects</span><div class="tags" style="margin-top:4px">${s.sfx.map(x=>`<span class="tag">${esc(x)}</span>`).join("")}</div></div>`:""}
+      ${s.music?`<div><span class="lbl mus">Music</span> <span>${esc(s.music.cue||"")} ${s.music.action?"· "+esc(s.music.action):""}</span></div>`:""}
+      ${s.transition?`<div class="muted" style="font-size:.85rem">Transition: ${esc(s.transition)}</div>`:""}
+    </div>
+  </article>`).join("")}
+  </div>
+  ${d.youtube||d.thumbnail_ideas||d.end_card?`<div class="panel" style="margin-top:16px"><h3>Publishing kit</h3>
+    ${p.alt_titles&&p.alt_titles.length?`<div><span class="lbl">Title options</span><ul style="margin:6px 0 0">${[p.title,...p.alt_titles].map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`:""}
+    ${d.thumbnail_ideas?`<div><span class="lbl">Thumbnails</span><ul style="margin:6px 0 0">${d.thumbnail_ideas.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`:""}
+    ${d.youtube?`<div><span class="lbl">Description</span><p style="white-space:pre-wrap;margin-top:4px">${esc(d.youtube.description)}</p></div>${(d.youtube.chapters||[]).length?`<div class="mono">${d.youtube.chapters.map(esc).join("<br>")}</div>`:""}<div class="tags">${(d.youtube.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join("")}</div>`:""}
+    ${d.end_card?`<p class="muted">End card: ${esc(d.end_card.cta||"")} ${d.end_card.next_tease?"· "+esc(d.end_card.next_tease):""}</p>`:""}
+  </div>`:""}`;
+  out.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>exportFile(b.dataset.x));
+  out.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{ const s=d.scenes[+b.dataset.i]; const t=b.dataset.copy==="vo"?s.voiceover:s.visual.comfyui_prompt; if(await copyText(t||"")) toast("Copied"); else showModal("Scene "+s.id, t||""); });
+  $("#save-board").onclick=async()=>{
+    const existing = currentId && projects[currentId];
+    const id = existing ? currentId : "proj_"+Date.now().toString(36);
+    const prev = existing || {};
+    const ok = await saveProject(Object.assign({}, prev, {id, title:p.title||brief.topic||"Untitled", genre:p.genre||"", lang:p.language||brief.lang, createdAt:prev.createdAt||Date.now(), updatedAt:Date.now(), brief:prev.brief||{...brief}, prompt:prev.prompt||lastPrompt, result:board.raw}));
+    currentId=id; ls.set("currentId",id); toast(ok?"Saved and synced":"Saved on this device");
+  };
+}
+function mdHeader(d,kind){ const p=d.project; return `# ${p.title||"Script"} · ${kind}\n\n_${p.genre||""} · ${p.language||""}${p.script?" ("+p.script+")":""} · ${fmt(d._total)} · ${d.scenes.length} scenes · made with U-Script_\n\n`; }
+function exportFile(kind){
+  const d=board.data, base=slug(d.project.title); let md="";
+  if(kind==="json"){ const c={...d}; delete c._total; delete c._words; return download(base+"_project.json", JSON.stringify(c,null,2)); }
+  if(kind==="vo"){ md=mdHeader(d,"Voiceover"); d.scenes.forEach(s=>{ md+=`## Scene ${s.id} · ${s.start} · ${s.title||""}\n`; if(s.delivery) md+=`> Delivery: ${s.delivery}\n\n`; md+=`${s.voiceover||""}\n\n`; }); }
+  if(kind==="vis"){ md=mdHeader(d,"Visual prompts for ComfyUI");
+    if(d.characters.length){ md+="## Character & location locks\n"; d.characters.forEach(c=>md+=`- **${c.name}**: ${c.visual_lock}\n`); md+="\n"; }
+    d.scenes.forEach(s=>{ const v=s.visual; md+=`## Scene ${s.id} · ${s.start} · ${s.title||""}\n- Shot: ${v.shot||"—"} · Camera: ${v.camera||"—"}\n- Description: ${v.description||"—"}\n\n**Prompt**\n\n${FENCE}\n${v.comfyui_prompt||""}\n${FENCE}\n\n**Negative**\n\n${FENCE}\n${v.negative_prompt||""}\n${FENCE}\n`; if(v.motion_prompt) md+=`\n**Motion:** ${v.motion_prompt}\n`; if(s.on_screen_text) md+=`\n**On-screen text:** ${s.on_screen_text}\n`; md+="\n"; }); }
+  if(kind==="music"){ md=mdHeader(d,"Music"); md+="## Cue palette\n\n| Cue | Mood | Style | BPM | Where |\n|---|---|---|---|---|\n"; d.music_palette.forEach(m=>md+=`| ${m.cue} | ${m.mood||""} | ${m.style||""} | ${m.bpm||""} | ${m.where||""} |\n`); md+="\n## Scene by scene\n\n"; d.scenes.forEach(s=>{ if(s.music) md+=`- ${s.start} · Scene ${s.id}: **${s.music.cue||""}** ${s.music.action||""}\n`; }); }
+  if(kind==="sfx"){ md=mdHeader(d,"Sound effects"); d.scenes.forEach(s=>{ md+=`## ${s.start} · Scene ${s.id} · ${s.title||""}\n`; s.sfx.forEach(x=>md+=`- [ ] ${x}\n`); if(s.transition) md+=`- Transition: ${s.transition}\n`; md+="\n"; });
+    const all=[...new Set(d.scenes.flatMap(s=>s.sfx))]; md+=`## Shopping list (${all.length} unique)\n`; all.forEach(x=>md+=`- [ ] ${x}\n`); }
+  if(kind==="full"){ md=mdHeader(d,"Full script"); if(d.project.logline) md+=`**Logline:** ${d.project.logline}\n\n`;
+    d.scenes.forEach(s=>{ md+=`## ${String(s.id).padStart(2,"0")} · ${s.start} · ${s.act||""} · ${s.title||""}\n\n**VO:** ${s.voiceover||""}\n\n`; if(s.delivery) md+=`_Delivery: ${s.delivery}_\n\n`; md+=`**Visual:** ${s.visual.description||""}\n\n**SFX:** ${s.sfx.join(", ")}  \n**Music:** ${s.music?(s.music.cue||"")+" "+(s.music.action||""):""}\n\n`; });
+    if(d.truth_ledger.length){ md+="## Truth ledger\n\n| ID | Claim | Status | Sources |\n|---|---|---|---|\n"; d.truth_ledger.forEach(f=>md+=`| ${f.id} | ${String(f.claim).replace(/\|/g,"/")} | ${f.status} | ${(f.sources||[]).map(s=>s.url?`[${s.name||s.url}](${s.url})`:s.name).join("; ")} |\n`); } }
+  download(`${base}_${{vo:"voiceover",vis:"visuals_comfyui",music:"music",sfx:"sfx",full:"full_script"}[kind]}.md`, md);
+}
+
+/* ============ VOICE LAB ============ */
+function voiceData(lang){ profile.voices=profile.voices||{}; return profile.voices[lang]=profile.voices[lang]||{answers:Array(20).fill(""),region:"",mix:"Balanced",formality:"",script:"",dna:""}; }
+function renderVoice(){
+  if(!profile) return;
+  $("#vl-name").textContent = profile.name||"you";
+  const lang=$("#vl-lang").value, v=voiceData(lang);
+  $("#vl-form").innerHTML = FORMALITY[lang].map(f=>`<option${f===v.formality?" selected":""}>${esc(f)}</option>`).join("");
+  $("#vl-region").value=v.region||""; $("#vl-mix").value=v.mix||"Balanced";
+  const rtl = lang==="Urdu";
+  $("#vl-lines").innerHTML = VL_LINES.map((l,i)=>`<div class="line${v.answers[i]&&v.answers[i].trim()?" done":""}"><span class="k">${String(i+1).padStart(2,"0")}</span><span class="src">${esc(l)}</span><textarea data-i="${i}" ${rtl?'dir="auto"':""} placeholder="How would you say this in ${esc(lang)}?">${esc(v.answers[i]||"")}</textarea></div>`).join("");
+  $("#vl-paste").value = v.dna||"";
+  $("#vl-status").textContent = v.dna ? "Voice DNA saved for "+lang+(v.dnaAt?" · "+new Date(v.dnaAt).toLocaleDateString():"") : "";
+  countVoice();
+}
+function countVoice(){ const v=voiceData($("#vl-lang").value); const n=v.answers.filter(a=>a&&a.trim()).length; $("#vl-count").textContent=`${n} / 20 lines`; $("#vl-bar").style.width=(n*5)+"%"; return n; }
+$("#vl-lang").onchange=()=>{ $("#vl-prompt").hidden=true; dnaPrompt=""; renderVoice(); };
+$("#vl-lines").addEventListener("input",e=>{ const t=e.target.closest("textarea[data-i]"); if(!t) return; const v=voiceData($("#vl-lang").value); v.answers[+t.dataset.i]=t.value; t.closest(".line").classList.toggle("done",!!t.value.trim()); countVoice(); ls.set("profile",profile); });
+["vl-region","vl-mix","vl-form"].forEach(id=>$("#"+id).addEventListener("change",()=>{ const v=voiceData($("#vl-lang").value); v.region=$("#vl-region").value; v.mix=$("#vl-mix").value; v.formality=$("#vl-form").value; ls.set("profile",profile); }));
+$("#vl-region").addEventListener("input",()=>{ voiceData($("#vl-lang").value).region=$("#vl-region").value; });
+$("#vl-save").onclick=async()=>{ const ok=await saveProfile(); toast(ok?"Answers saved and synced":"Answers saved on this device"); };
+function buildDnaPrompt(){
+  const lang=$("#vl-lang").value, v=voiceData(lang);
+  const pairs=VL_LINES.map((l,i)=>[l,v.answers[i]]).filter(p=>p[1]&&p[1].trim());
+  const L=[];
+  L.push(`# Build a Voice DNA profile for ${profile.name} (${lang})`);
+  L.push("");
+  L.push(`You are a dialect coach and sociolinguist who prepares narrators for storytelling channels. ${profile.name} narrates videos in ${lang}. Below are reference lines in standard English and how ${profile.name} naturally says each one.`);
+  L.push("");
+  L.push(`About the speaker: from ${v.region||"(not given)"} · English mixing: ${v.mix} · addresses viewers as: ${v.formality||FORMALITY[lang][0]}`);
+  L.push("");
+  L.push("## The lines");
+  pairs.forEach(([en,a],i)=>L.push(`${i+1}. "${en}" → "${a.trim()}"`));
+  L.push("");
+  L.push("## Your task");
+  L.push(`Compare each pair carefully and describe exactly how ${profile.name}'s ${lang} differs from the standard/textbook form. Base every point ONLY on evidence in these lines; don't assume features of the region that the lines don't show. If something is unclear, say "not enough evidence".`);
+  L.push("");
+  L.push(`Write the profile in Markdown, under 450 words, titled "${profile.name}'s ${lang} Voice DNA", with these sections:`);
+  L.push("1. **Snapshot**: 2 sentences on the overall sound (region, warmth, formality).");
+  L.push("2. **Code-mixing**: roughly how much English, which kinds of words stay English, which are always native.");
+  L.push("3. **Signature words & swaps**: a table of standard word/phrase → how this speaker says it (8–15 rows, taken from the lines).");
+  L.push("4. **Grammar & particles**: verb endings, pronouns, fillers, emphasis words, question tags.");
+  L.push("5. **Rhythm & storytelling habits**: sentence length, how they open, build suspense, and sign off.");
+  L.push("6. **Spelling conventions**: which script they used and how they spell common words, so a writer can copy it.");
+  L.push("7. **Do / Don't**: 5 rules each for a scriptwriter imitating this voice.");
+  L.push("Reply with only the profile.");
+  return L.join("\n");
+}
+$("#vl-gen").onclick=()=>{
+  const n=countVoice(); if(n<8){ toast("Answer at least 8 lines first ("+n+" so far)"); return; }
+  dnaPrompt=buildDnaPrompt(); $("#vl-prompt").hidden=false; $("#vl-prompt").textContent=dnaPrompt;
+  saveProfile(); copyText(dnaPrompt).then(ok=>toast(ok?"Voice DNA prompt copied":"Prompt ready below"));
+};
+$("#vl-run").onclick=async()=>{
+  if(!SAMPLE) return;
+  const n=countVoice(); if(n<8){ toast("Answer at least 8 lines first ("+n+" so far)"); return; }
+  dnaPrompt=buildDnaPrompt(); $("#vl-prompt").hidden=false; $("#vl-prompt").textContent=dnaPrompt;
+  $("#vl-status").textContent="Claude is studying your lines…"; $("#vl-run").disabled=true;
+  try{ const r=await SAMPLE(dnaPrompt,{modelTier:"default",cache:false,onText:u=>{$("#vl-paste").value=u.text;}}); $("#vl-paste").value=r.text; $("#vl-status").textContent="Review it, then save."; }
+  catch(err){ $("#vl-status").textContent = err&&err.code==="not_granted" ? "Claude access wasn't allowed. Use an AI button instead." : "Couldn't finish here. Use an AI button instead."; }
+  $("#vl-run").disabled=false;
+};
+$("#vl-dna-save").onclick=async()=>{
+  const t=$("#vl-paste").value.trim(); if(t.length<80){ toast("Paste the full Voice DNA profile first"); return; }
+  const lang=$("#vl-lang").value, v=voiceData(lang); v.dna=t; v.dnaAt=Date.now(); v.script=brief.script||"";
+  const ok=await saveProfile(); $("#vl-status").textContent="Voice DNA saved for "+lang; toast(ok?"Voice DNA saved and synced":"Voice DNA saved on this device");
+};
+
+/* ============ LIBRARY ============ */
+function renderLibrary(){
+  $("#pf-name").value=profile.name||""; $("#pf-channel").value=profile.channel||"";
+  $("#pf-langs").innerHTML=["Hinglish","English","Urdu","Nepali"].map(l=>{ const v=profile.voices&&profile.voices[l]; const n=v?v.answers.filter(a=>a&&a.trim()).length:0;
+    return `<div><span><b>${l}</b> <span class="muted">· ${n}/20 lines</span></span>${v&&v.dna?'<span class="pill verified">DNA ready</span>':`<button class="btn small ghost" data-vl="${l}">Take test</button>`}</div>`; }).join("");
+  $$("#pf-langs [data-vl]").forEach(b=>b.onclick=()=>{ $("#vl-lang").value=b.dataset.vl; go("voice"); });
+  $("#pf-sync").textContent = FBUSER ? "Synced to "+(FBUSER.email||"your Google account")+": sign in on any device and your profile, Voice DNA and projects are there." : "Saved in this browser only. Sign in with Google to sync, or use Export profile to move it to another device.";
+  paintAuth();
+  const list=Object.values(projects).sort((a,b)=>(b.updatedAt||b.createdAt)-(a.updatedAt||a.createdAt));
+  $("#lib-cards").innerHTML = list.length ? list.map(p=>`<div class="pcard">
+    <p class="eyebrow">${esc(p.genre)} · ${esc(p.lang)}</p><h3>${esc(p.title)}</h3>
+    <p class="muted" style="font-size:.82rem">${new Date(p.updatedAt||p.createdAt).toLocaleString()} · ${p.result?'<span class="pill verified">script ready</span>':'<span class="pill needs_verification">prompt only</span>'}</p>
+    <div class="row"><button class="btn small primary" data-open="${esc(p.id)}">Open</button><button class="btn small ghost" data-del="${esc(p.id)}">Delete</button></div></div>`).join("")
+    : `<div class="empty" style="grid-column:1/-1"><h3>Nothing saved yet</h3><p class="muted">Generate a prompt in the Studio, then hit "Save to library".</p><button class="btn small primary" id="lib-start">Go to Studio</button></div>`;
+  const ls2=$("#lib-start"); if(ls2) ls2.onclick=()=>go("studio");
+  $$("[data-open]").forEach(b=>b.onclick=()=>{ const p=projects[b.dataset.open]; if(!p) return; currentId=p.id; ls.set("currentId",p.id);
+    if(p.brief){ brief=Object.assign(defaultBrief(),p.brief); } lastPrompt=p.prompt||""; ls.set("lastPrompt",lastPrompt);
+    if(p.result){ try{ board={raw:p.result,data:normalize(parseResult(p.result)),example:false}; ls.set("board",board); $("#paste").value=p.result; go("board"); return; }catch(e){} }
+    go("studio"); });
+  $$("[data-del]").forEach(b=>b.onclick=()=>{ if(b.dataset.armed){ delete projects[b.dataset.del]; ls.set("projects",projects); cloudDelete(b.dataset.del); if(currentId===b.dataset.del){currentId=null;ls.set("currentId",null);} renderLibrary(); toast("Deleted"); } else { b.dataset.armed="1"; b.textContent="Tap again to delete"; b.style.borderColor="var(--bad)"; b.style.color="var(--bad)"; } });
+}
+$("#pf-save").onclick=async()=>{ profile.name=$("#pf-name").value.trim()||profile.name; profile.channel=$("#pf-channel").value.trim(); const ok=await saveProfile(); paintUser(); toast(ok?"Profile saved and synced":"Profile saved"); };
+$("#pf-export").onclick=()=>download(slug(profile.name)+"_uscript_profile.json", JSON.stringify({profile, projects},null,2));
+$("#pf-import").onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=async()=>{ try{ const j=JSON.parse(r.result); if(!j.profile||!j.profile.name) throw 0; profile=j.profile; projects=Object.assign(projects,j.projects||{}); ls.set("projects",projects); await saveProfile(); for(const p of Object.values(j.projects||{})) cloudSave(p.id,p); paintUser(); renderLibrary(); toast("Profile imported"); }catch(err){ toast("That file isn't a U-Script profile"); } };
+  r.readAsText(f); e.target.value=""; };
+
+/* ============ BOOT ============ */
+function boot(){
+  if(profile){ paintUser(); $("#si-name").value=profile.name||""; $("#si-channel").value=profile.channel||""; $("#si-lang").value=profile.lang||"Hinglish"; }
+  if(board) $("#paste").value=board.raw||"";
+  paintAuth();
+  const last=ls.get("view","studio");
+  go(profile ? (last==="landing"?"studio":last) : "landing");
+}
+boot();
+</script>
+<!-- Firebase: Google sign-in + Firestore sync. Free (Spark plan). Keys live in firebase-config.js -->
+<script type="module">
+const FB = "https://www.gstatic.com/firebasejs/10.12.2/";
+let firebaseConfig = null;
+try { ({ firebaseConfig } = await import("./firebase-config.js")); } catch (e) { /* file missing */ }
+const configured = firebaseConfig && firebaseConfig.apiKey && !String(firebaseConfig.apiKey).startsWith("PASTE");
+if (!configured) {
+  window.USCRIPT.noFirebase("Google sign-in isn't switched on yet: add your Firebase keys to firebase-config.js (see README).");
+} else {
+  try {
+    const { initializeApp } = await import(FB + "firebase-app.js");
+    const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } = await import(FB + "firebase-auth.js");
+    const { initializeFirestore, persistentLocalCache, doc, setDoc, deleteDoc, collection, getDocs } = await import(FB + "firebase-firestore.js");
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = initializeFirestore(app, { localCache: persistentLocalCache() });
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    getRedirectResult(auth).catch(() => {});
+    window.USCRIPT.ready({
+      async signIn() {
+        try { await signInWithPopup(auth, provider); }
+        catch (e) {
+          if (["auth/popup-blocked", "auth/operation-not-supported-in-this-environment", "auth/cancelled-popup-request"].includes(e.code)) await signInWithRedirect(auth, provider);
+          else throw e;
+        }
+      },
+      signOut: () => signOut(auth)
+    });
+    onAuthStateChanged(auth, (u) => {
+      if (!u) return window.USCRIPT.onAuth(null, null);
+      const items = collection(db, "users", u.uid, "items");
+      const cloud = {
+        save: (key, val) => setDoc(doc(items, key), val),
+        del: (key) => deleteDoc(doc(items, key)),
+        list: async () => (await getDocs(items)).docs.map(d => ({ id: d.id, data: d.data() }))
+      };
+      window.USCRIPT.onAuth({ uid: u.uid, name: u.displayName || "", email: u.email || "", photo: u.photoURL || "" }, cloud);
+    });
+  } catch (e) {
+    console.error(e);
+    window.USCRIPT.noFirebase("Couldn't load Google sign-in right now. You can still use U-Script in this browser.");
+  }
+}
+</script>
+
+</body>
+</html>

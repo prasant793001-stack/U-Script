@@ -1,0 +1,12 @@
+{
+  "name": "U-Script",
+  "short_name": "U-Script",
+  "description": "Story-driven, fact-locked script studio for informative channels.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FFF8EE",
+  "theme_color": "#FF6B00",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
