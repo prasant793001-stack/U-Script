@@ -32,7 +32,7 @@ Open `http://localhost:8000`. Open it through a server, not by double-clicking `
 
 1. Repo → **Settings → Pages**.
 2. Source: **Deploy from a branch** → `main` → `/ (root)` → **Save**.
-3. After a minute the app is live at `https://prasant793001-stack.github.io/u-script/`.
+3. After a minute the app is live at `https://prasant793001-stack.github.io/U-Script/`.
 
 ## Turn on Google sign-in (free, about 10 minutes)
 
