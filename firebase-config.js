@@ -1,18 +1,14 @@
-// U-Script · Firebase settings
+// U-Script · Firebase settings (project: u-script)
 // ------------------------------------------------------------
-// 1. Create a free Firebase project (Spark plan, no card needed).
-// 2. Project settings → General → Your apps → Web app (</>) → copy the config.
-// 3. Paste the values below, commit, and push.
-//
 // These values are NOT secret. Firebase web keys are designed to be public;
 // your data is protected by firestore.rules and the "Authorized domains" list.
 // Full walkthrough: README.md → "Turn on Google sign-in".
 
 export const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000000000"
+  apiKey: "AIzaSyAGdOywqtbuG0iof7nFc16KVln0ShHEj8M",
+  authDomain: "u-script.firebaseapp.com",
+  projectId: "u-script",
+  storageBucket: "u-script.firebasestorage.app",
+  messagingSenderId: "1025985989482",
+  appId: "1:1025985989482:web:2b863fa50f29c5143ff313"
 };
