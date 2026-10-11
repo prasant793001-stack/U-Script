@@ -900,7 +900,7 @@ const TTS = (()=>{
   const S = Object.assign({}, DEF, ls.get("tts", {}));
   const save = ()=>ls.set("tts", S);
   const DEV=/[ऀ-ॿ]/, ARAB=/[؀-ۿ]/;
-  let voices=[], job=null, chunks=[], idx=0, state="idle", token=0, timer=null, keep=null, curVoice=null, lastScene=-1, warned=false, tFails=0;
+  let startSeen=false, voices=[], job=null, chunks=[], idx=0, state="idle", token=0, timer=null, keep=null, curVoice=null, lastScene=-1, warned=false, tFails=0;
   const tcache={};
 
   /* ---- voices ---- */
@@ -1028,24 +1028,59 @@ const TTS = (()=>{
       if(t!==token) return;
       if(failed && !warned){ warned=true; toast("Couldn't convert to Hindi script, so the Roman text is read as-is. New scripts include Hindi voice text automatically."); }
     }
-    state="playing"; paint(); speak(t);
+    state="playing"; paint(); timer=setTimeout(()=>speak(t),80);
   }
-  function speak(t){
+  /* Speak exactly one chunk at a time and never skip one.
+     Free browser voices (Edge "Online/Natural", Chrome "Google") are network voices and can:
+     - fail a sentence with an error, or report "ended" instantly without saying anything,
+     - fire "end" twice, or never fire it at all.
+     So: each chunk advances only once, quick/failed endings are retried (then a fallback voice),
+     we never queue a new sentence while the engine is still talking, and a watchdog
+     recovers if "end" never arrives. */
+  function altVoice(code, v){
+    const list=byLang(code).filter(x=>!v||x.name!==v.name);
+    return list.find(x=>x.localService) || list[0] || v;
+  }
+  function speak(t, tries=0, waited=0){
     if(t!==token) return;
     if(idx>=chunks.length) return done(t);
-    const c=chunks[idx], code=langOf(c.text), v=voiceFor(code), m=mood(job.delivery);
+    if((synth.speaking||synth.pending) && waited<40){ timer=setTimeout(()=>speak(t,tries,waited+1),100); return; }
+    if(synth.paused) synth.resume();
+    const my=idx, c=chunks[my], code=langOf(c.text), m=mood(job.delivery);
+    let v=voiceFor(code); if(tries>=2) v=altVoice(code,v);
     const u=new SpeechSynthesisUtterance(c.text);
     if(v){ u.voice=v; u.lang=v.lang; } else u.lang = code==="hi"?"hi-IN":code==="ur"?"ur-PK":"en-IN";
     u.rate=Math.min(2,Math.max(.5,S.rate*m.rate));
     u.pitch=Math.min(2,Math.max(0,S.pitch*m.pitch));
     u.volume=m.volume;
-    u.onend=()=>{ if(t!==token) return; idx++; paint(); timer=setTimeout(()=>speak(t), Math.round(c.gap*S.pause)); };
+    const t0=Date.now(), minMs=Math.max(150, c.text.length*10/u.rate); // real speech is ~60–80 ms per character
+    let settled=false, watch=null, checks=0;
+    const finish=ok=>{
+      if(settled||t!==token) return;
+      settled=true; clearTimeout(watch);
+      if(ok){ idx=my+1; paint(); timer=setTimeout(()=>speak(t), Math.round(c.gap*S.pause)); return; }
+      if(tries<3){ // retry the SAME sentence
+        timer=setTimeout(()=>{ if(t!==token) return; if(synth.speaking||synth.pending) synth.cancel(); timer=setTimeout(()=>speak(t,tries+1),150); },120);
+        return;
+      }
+      idx=my+1; paint(); toast("One sentence couldn't be spoken by this voice. Try another voice in settings."); timer=setTimeout(()=>speak(t),120);
+    };
+    let began=0;
+    u.onstart=()=>{ began=Date.now(); startSeen=true; };
+    u.onend=()=>{
+      // Browsers that report "start" never start a sentence they fail on: no start = not spoken.
+      if(startSeen && !began) return finish(false);
+      const quick = Date.now()-(began||t0) < minMs;
+      finish(!quick || tries>0);                          // a suspiciously quick end is retried once
+    };
     u.onerror=e=>{
       if(t!==token) return;
-      if(e.error==="interrupted"||e.error==="canceled") return;
-      if(e.error==="not-allowed"){ state="idle"; paint(); toast("Press play again to allow audio"); return; }
-      idx++; timer=setTimeout(()=>speak(t),80);
+      if(e.error==="not-allowed"){ settled=true; clearTimeout(watch); state="idle"; paint(); toast("Press play again to allow audio"); return; }
+      finish(false);
     };
+    const est=4000+c.text.length*110/u.rate;
+    const check=()=>{ if(settled||t!==token) return; if((synth.speaking||synth.pending) && ++checks<6){ watch=setTimeout(check,2500); return; } finish(true); };
+    watch=setTimeout(check,est);
     keep=u; curVoice=v; paint();
     synth.speak(u);
   }
@@ -1067,7 +1102,7 @@ const TTS = (()=>{
     if(el && all){ const r=el.getBoundingClientRect(); if(r.top<70||r.bottom>innerHeight-140) el.scrollIntoView({behavior:"smooth",block:"center"}); }
   }
   function pause(){ if(state!=="playing") return; token++; synth.cancel(); clearTimeout(timer); state="paused"; paint(); }
-  function resume(){ if(state!=="paused") return; const t=++token; state="playing"; paint(); speak(t); }
+  function resume(){ if(state!=="paused") return; const t=++token; state="playing"; paint(); timer=setTimeout(()=>speak(t),80); }
   function stop(){ token++; if(synth) synth.cancel(); clearTimeout(timer); state="idle"; idx=0; chunks=[]; job=null; paint(); }
   function toggleScene(i){
     if(job && job.scene===i){
