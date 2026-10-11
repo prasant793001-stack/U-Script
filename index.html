@@ -200,6 +200,15 @@ th{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--in
 .modal{background:var(--surface);border-radius:18px;padding:20px;width:min(760px,100%);max-height:85vh;display:grid;gap:12px;grid-template-rows:auto 1fr auto;border:2px solid var(--ink)}
 .modal textarea{height:100%;min-height:260px;font-family:var(--f-mono);font-size:.8rem}
 
+/* big paste editor */
+.ed-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ed-count{margin-left:auto;font-size:.78rem;color:var(--ink-2);font-variant-numeric:tabular-nums;font-weight:600}
+.editor{height:60vh;min-height:320px;resize:vertical;font-family:var(--f-mono),"Noto Sans Devanagari","Noto Nastaliq Urdu",monospace;font-size:.8rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+#paste-panel.full{position:fixed;inset:0;z-index:45;border-radius:0;border:0;margin:0;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;background:var(--surface)}
+#paste-panel.full .editor{flex:1;height:auto;min-height:0;resize:none;font-size:.85rem}
+.parse-notes{display:grid;gap:6px}
+.parse-notes p{font-size:.86rem;border-radius:10px;padding:8px 12px;background:var(--warn-bg);color:var(--warn)}
+.parse-notes p.err{background:var(--bad-bg);color:var(--bad)}
 /* voice preview player: a fixed "studio console" look in both themes */
 .listen{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--orange);background:var(--orange);color:var(--on-accent);border-radius:999px;padding:5px 14px 5px 6px;font-weight:700;font-size:.85rem;cursor:pointer;transition:transform .12s,box-shadow .12s}
 .listen:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
@@ -490,9 +499,21 @@ th{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--in
     <div class="row"><button class="btn small ghost" id="load-example-hi">Hindi example</button><button class="btn small ghost" id="load-example">English example</button><button class="btn small ghost" id="clear-board">Clear</button></div>
   </div>
   <div class="panel" id="paste-panel">
-    <label class="f" for="paste">Paste the full reply (the JSON block). Extra text around it is fine.</label>
-    <textarea id="paste" class="mono" style="min-height:160px" placeholder='{"project": {...}, "scenes": [...]}'></textarea>
+    <label class="f" for="paste" style="font-size:1rem">Paste the AI's full reply</label>
+    <p class="muted" style="font-size:.88rem;margin-top:-6px">Any length works, even thousands of lines. If the AI's reply came in several parts, add them one after another in order. A plain-text script without JSON also works.</p>
+    <div class="ed-tools">
+      <button class="btn small" id="paste-clip">Paste from clipboard</button>
+      <button class="btn small" id="paste-add">Add next part</button>
+      <label class="btn small ghost" style="cursor:pointer">Open a file<input type="file" id="paste-file" accept=".txt,.md,.json,.markdown,text/plain,application/json" hidden></label>
+      <button class="btn small ghost" id="paste-full" aria-pressed="false">Full screen</button>
+      <button class="btn small ghost" id="paste-clear">Empty box</button>
+      <span class="ed-count" id="paste-count" aria-live="polite">Empty</span>
+    </div>
+    <textarea id="paste" class="editor" spellcheck="false" autocomplete="off" placeholder="Paste here (Ctrl+V / Cmd+V)…
+
+{&quot;project&quot;: {...}, &quot;scenes&quot;: [...]}"></textarea>
     <div class="row"><button class="btn primary" id="build">Build scenes</button><span class="muted" id="parse-msg" style="font-size:.88rem"></span></div>
+    <div class="parse-notes" id="parse-notes"></div>
   </div>
   <div id="board-out"></div>
   <div class="player" id="player" hidden aria-label="Voice preview player">
@@ -830,7 +851,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ls = {
   get(k, d){ try{ const v = localStorage.getItem("uscript."+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
-  set(k, v){ try{ localStorage.setItem("uscript."+k, JSON.stringify(v)); }catch(e){} }
+  set(k, v){ try{ localStorage.setItem("uscript."+k, JSON.stringify(v)); return true; }catch(e){ return false; } }
 };
 /* CLOUD is set by the Firebase module when a user is signed in: {save(key,val), del(key), list()} */
 let CLOUD = null, FBUSER = null, AUTH = null, SAMPLE = null;
@@ -844,18 +865,27 @@ let dnaPrompt = "";
 function defaultBrief(){
   return {topic:"",genre:"",basis:"real",truth:true,depth:"standard",audience:"General audience",dur:"8",platform:"long",narrator:"Documentary narrator (third person)",hook:"Shocking verified fact",ending:"Twist or final reveal",intensity:3,series:"",lang:(profile&&profile.lang)||"Hinglish",script:"",voicestyle:"Warm and conversational",vstyle:"Cinematic photoreal",music:"Cinematic orchestral",pace:"auto",must:"",avoid:"",extras:["titles","thumb","desc","bible","broll"]};
 }
+const PART = 200000; // characters per cloud document (Devanagari is 3 bytes/char; Firestore allows 1 MB per document)
 function cloudSave(key, val){
   if(!CLOUD) return Promise.resolve(false);
-  return CLOUD.save(key, JSON.parse(JSON.stringify(val))).then(()=>true).catch(err=>{ console.warn("Cloud save failed", err); return false; });
+  const v = JSON.parse(JSON.stringify(val)), jobs = [];
+  if(typeof v.result==="string" && v.result.length>PART){
+    const n = Math.ceil(v.result.length/PART);
+    for(let i=0;i<n;i++) jobs.push(CLOUD.save(key+"__p"+i, {of:key, n:i, part:v.result.slice(i*PART,(i+1)*PART)}));
+    v.result = ""; v.resultParts = n;
+  } else v.resultParts = 0;
+  jobs.push(CLOUD.save(key, v));
+  return Promise.all(jobs).then(()=>true).catch(err=>{ console.warn("Cloud save failed", err); return false; });
 }
-function cloudDelete(key){ if(CLOUD) CLOUD.del(key).catch(()=>{}); }
+function cloudDelete(key, parts=0){ if(!CLOUD) return; CLOUD.del(key).catch(()=>{}); for(let i=0;i<parts;i++) CLOUD.del(key+"__p"+i).catch(()=>{}); }
 function saveProfile(){
   profile.updatedAt = Date.now();
   ls.set("profile", profile);
   return cloudSave("profile", profile);
 }
 function saveProject(p){
-  projects[p.id] = p; ls.set("projects", projects);
+  projects[p.id] = p;
+  if(!ls.set("projects", projects)) toast("This browser's storage is full, so the project is only saved to your account"+(CLOUD?"":" (sign in with Google to keep it)"));
   return cloudSave(p.id, p);
 }
 
@@ -1266,7 +1296,11 @@ window.USCRIPT = {
     try{
       const items = await cloud.list();
       let remoteProfile = null;
+      const parts = {};
+      items.forEach(({id,data})=>{ if(id.includes("__p") && data && data.of){ (parts[data.of]=parts[data.of]||[])[data.n]=data.part; } });
       items.forEach(({id,data})=>{
+        if(id.includes("__p")) return;
+        if(data && data.resultParts>0){ const ps=parts[id]||[]; data.result = ps.length>=data.resultParts && ps.slice(0,data.resultParts).every(x=>typeof x==="string") ? ps.slice(0,data.resultParts).join("") : ""; }
         if(id==="profile") remoteProfile = data;
         else if(id.startsWith("proj_")){ const loc=projects[id]; if(!loc || (data.updatedAt||data.createdAt||0) >= (loc.updatedAt||loc.createdAt||0)) projects[id]=data; }
       });
@@ -1510,45 +1544,222 @@ $("#run-here").onclick=async()=>{
 
 /* ============ SCENE BOARD ============ */
 let currentId = ls.get("currentId", null);
-function parseResult(raw){
-  let s = String(raw||"").trim();
-  const m = s.match(/```(?:json)?\s*([\s\S]*?)```/i); if(m) s=m[1];
-  const a=s.indexOf("{"), z=s.lastIndexOf("}");
-  if(a<0||z<a) throw new Error("No JSON object found. Make sure you pasted the whole reply, including the { and } braces.");
-  s=s.slice(a,z+1);
-  try{ return JSON.parse(s); }catch(e){
-    const fixed = s.replace(/,\s*([}\]])/g,"$1").replace(/[“”]/g,'"');
-    try{ return JSON.parse(fixed); }catch(e2){ throw new Error("The JSON is incomplete or broken ("+e2.message+"). If the AI cut off, ask it: \"continue the JSON exactly where you stopped\" and paste both parts together."); }
+/* ---- Reading the AI reply: any size, several parts, cut-off JSON, or plain text ---- */
+function repairJson(s){
+  // Escape raw line breaks / tabs inside strings (AIs often put real newlines in voiceover text),
+  // then drop trailing commas.
+  let out="", inStr=false, esc=false;
+  for(let i=0;i<s.length;i++){
+    const ch=s[i];
+    if(inStr){
+      if(esc){ esc=false; out+=ch; continue; }
+      if(ch==="\\"){ esc=true; out+=ch; continue; }
+      if(ch==='"'){ inStr=false; out+=ch; continue; }
+      if(ch==="\n"){ out+="\\n"; continue; }
+      if(ch==="\r") continue;
+      if(ch==="\t"){ out+="\\t"; continue; }
+      if(ch<" ") continue;
+      out+=ch;
+    } else { if(ch==='"') inStr=true; out+=ch; }
   }
+  return out.replace(/,\s*([}\]])/g,"$1");
 }
+function salvageJson(s){
+  // The reply was cut off: keep everything up to the last complete value and close the brackets.
+  let inStr=false, esc=false; const stack=[], cuts=[];
+  for(let i=0;i<s.length;i++){
+    const ch=s[i];
+    if(inStr){ if(esc) esc=false; else if(ch==="\\") esc=true; else if(ch==='"') inStr=false; continue; }
+    if(ch==='"'){ inStr=true; continue; }
+    if(ch==="{"||ch==="[") stack.push(ch==="{"?"}":"]");
+    else if(ch==="}"||ch==="]"){ stack.pop(); if(stack.length) cuts.push([i+1, stack.slice()]); }
+  }
+  if(!stack.length && !inStr) return null;
+  for(let k=cuts.length-1; k>=0 && k>=cuts.length-600; k--){
+    const [pos,st]=cuts[k];
+    const t=s.slice(0,pos).replace(/,\s*$/,"")+st.slice().reverse().join("");
+    try{ return JSON.parse(t); }catch(e){}
+  }
+  return null;
+}
+function jsonCandidates(text){
+  text=String(text).replace(/\r\n?/g,"\n");
+  const slice=s=>{ const a=s.indexOf("{"); if(a<0) return ""; const z=s.lastIndexOf("}"); return z>a ? s.slice(a,z+1) : s.slice(a); };
+  // Code fences split the reply into parts; pure chatter between parts ("Here is the rest:") has no quotes or braces.
+  // Chat lines around a part ("Sure! Here is the continuation:") have no quotes or brackets: trim them off each part.
+  const isChat=l=>l.trim() && !/["{}\[\]]/.test(l);
+  const trimChat=p=>{ const L=p.split("\n"); while(L.length && (isChat(L[L.length-1])||!L[L.length-1].trim())) L.pop(); while(L.length && (isChat(L[0])||!L[0].trim())) L.shift(); return L.join("\n"); };
+  const pieces=text.split(/^[ \t]*```[^\n]*$/m).map(trimChat).filter(p=>/["{}]/.test(p));
+  const join=sep=>pieces.reduce((acc,p)=>{
+    if(!acc) return p;
+    const lastLine=acc.slice(acc.lastIndexOf("\n")+1), pt=p.replace(/^[ \t]*\n/,""), first=pt.split("\n")[0];
+    if(lastLine.trim().length>3 && first.trim().startsWith(lastLine.trim())) return acc.slice(0,acc.length-lastLine.length)+pt; // continuation repeated the cut line
+    return acc.replace(/\s+$/,"")+sep+pt.replace(/^\s+/,"");
+  },"");
+  const c=[slice(text), slice(join("")), slice(join("\n")), slice(join(" "))].filter(Boolean);
+  return [...new Set(c)];
+}
+function plainToData(text){
+  const lang0 = /[ऀ-ॿ]/.test(text) ? "Hindi" : /[؀-ۿ]/.test(text) ? "Urdu"
+    : ((text.match(/\b(hai|hain|ka|ki|ke|aur|nahi|mein|se|ko|tha|thi|kya|yeh|woh|bhi)\b/gi)||[]).length / Math.max(1,text.split(/\s+/).length) > 0.03 ? "Hinglish" : "English");
+  const lines=text.replace(/\r\n?/g,"\n").split("\n");
+  const firstLine=(lines.find(l=>l.trim())||"").trim();
+  const title=/^#\s+/.test(firstLine) ? firstLine.replace(/^#\s+/,"").replace(/\*/g,"").trim() : "";
+  const head=/^\s*(?:#{1,6}\s*)?(?:\*\*)?\s*(?:scene|seen|sceen|shot|दृश्य|सीन|منظر)\s*[-–:#.]?\s*(\d+)\s*(?:\*\*)?\s*[-–:.)|·]*\s*(.*?)\s*(?:\*\*)?\s*$/i;
+  let blocks=[], cur=null;
+  lines.forEach(l=>{ const m=l.match(head); if(m){ cur={title:(m[2]||"").replace(/[*#]/g,"").trim(), text:[]}; blocks.push(cur); } else if(cur) cur.text.push(l); });
+  if(blocks.length<2){
+    blocks=[]; let buf=[], wc=0;
+    text.split(/\n\s*\n+/).map(p=>p.trim()).filter(p=>p && !(title && p.replace(/^#\s+/,"").replace(/\*/g,"").trim()===title)).forEach(p=>{
+      const w=p.split(/\s+/).length;
+      if(buf.length && wc+w>140){ blocks.push({title:"",text:buf}); buf=[]; wc=0; }
+      buf.push(p,""); wc+=w;
+    });
+    if(buf.length) blocks.push({title:"",text:buf});
+  }
+  const lab=/^\s*(?:[-*•]\s*)?\**\s*(v\.?o\.?|voice\s*-?\s*over|narration|narrator|visuals?|image|camera|sfx|sound(?:\s*effects?)?|music|bgm|on[-\s]?screen(?:\s*text)?|text on screen|delivery|tone)\s*\**\s*[:：–-]\s*\**\s*(.*)$/i;
+  const kind=k=>{ k=k.toLowerCase(); return /visual|image|camera/.test(k)?"vis": /^v\.?o|voice|narra/.test(k)?"vo": /sfx|sound/.test(k)?"sfx": /music|bgm/.test(k)?"mus": /screen/.test(k)?"ost":"del"; };
+  const wpm=WPM[lang0]||140;
+  const scenes=blocks.map((b,i)=>{
+    const s={id:i+1,title:b.title,voiceover:"",delivery:"",on_screen_text:"",visual:{description:""},sfx:[],music:null};
+    let field="vo"; const vo=[];
+    b.text.join("\n").split("\n").forEach(raw=>{
+      let line=raw.replace(/\*\*/g,"");
+      const m=line.match(lab); if(m){ field=kind(m[1]); line=m[2]; }
+      const t=line.trim();
+      if(field==="vo"){ vo.push(t); return; }
+      if(!t) return;
+      if(field==="vis") s.visual.description+=(s.visual.description?" ":"")+t;
+      else if(field==="sfx") s.sfx.push(...t.split(/[,;·|]/).map(x=>x.trim()).filter(Boolean));
+      else if(field==="mus") s.music={cue:"",action:((s.music&&s.music.action)?s.music.action+" ":"")+t};
+      else if(field==="ost") s.on_screen_text+=(s.on_screen_text?" ":"")+t;
+      else s.delivery+=(s.delivery?" ":"")+t;
+    });
+    s.voiceover=vo.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+    const words=s.voiceover.split(/\s+/).filter(Boolean).length;
+    s.duration_sec=Math.max(3,Math.round(words/wpm*60));
+    if(!s.title) s.title = s.voiceover.split(/[.!?।\n]/)[0].split(/\s+/).slice(0,6).join(" ");
+    return s;
+  }).filter(s=>s.voiceover||s.visual.description);
+  scenes.forEach((s,i)=>s.id=i+1);
+  return {project:{title:title||"Pasted script", language:lang0, script:lang0==="Hindi"?"Devanagari":lang0==="Urdu"?"Urdu (Nastaliq)":"Latin", genre:"Plain script"}, scenes};
+}
+function parseAny(raw){
+  const text=String(raw||"");
+  if(!text.trim()) throw new Error("The box is empty. Paste the AI's reply first.");
+  const notes=[];
+  const looksJson = /"scenes"\s*:/.test(text) || /^\s*(?:```[a-z]*\s*)?\{/i.test(text);
+  if(looksJson){
+    const cands=jsonCandidates(text);
+    for(const c of cands){ for(const v of [c, repairJson(c)]){ try{ const d=JSON.parse(v); if(d && typeof d==="object") return {data:d, notes}; }catch(e){} } }
+    for(const c of cands){
+      const d=salvageJson(repairJson(c));
+      if(d && Array.isArray(d.scenes) && d.scenes.length){
+        notes.push(`The reply was cut off, so ${d.scenes.length} scene(s) were built (the last one may be incomplete). Ask the AI: "continue the JSON exactly where you stopped", press Add next part, then Build scenes again.`);
+        return {data:d, notes};
+      }
+    }
+    if(/"scenes"\s*:/.test(text)) throw new Error("This looks like the JSON reply, but it's broken in a way that can't be repaired. Check that every part of the reply was pasted in order.");
+  }
+  const d=plainToData(text);
+  if(!d.scenes.length) throw new Error("Couldn't find any script text to turn into scenes.");
+  notes.push(`No JSON found, so your text was split into ${d.scenes.length} scene(s) as a plain script. Visual prompts, music and SFX come with the JSON reply from Generate Prompt.`);
+  return {data:d, notes};
+}
+function parseResult(raw){ return parseAny(raw).data; }
+function makeBoard(raw, example){ const r=parseAny(raw); const data=normalize(r.data); if(!data.scenes.length) throw new Error("Found the reply, but it has no scenes in it."); return {raw, data, example:!!example, notes:r.notes}; }
+function saveBoard(){ return board ? ls.set("board",{raw:board.raw, example:board.example}) : ls.set("board",null); }
 function normalize(d){
   d.project=d.project||{}; d.scenes=Array.isArray(d.scenes)?d.scenes:[]; d.truth_ledger=d.truth_ledger||[]; d.music_palette=d.music_palette||[]; d.characters=d.characters||[];
   let t=0; d.scenes.forEach((s,i)=>{ s.id=s.id??i+1; s.visual=s.visual||{}; s.sfx=Array.isArray(s.sfx)?s.sfx:(s.sfx?[s.sfx]:[]); s.duration_sec=+s.duration_sec||0; if(!s.start) s.start=fmt(t); t+=s.duration_sec; });
   d._total=t; d._words=d.scenes.reduce((n,s)=>n+String(s.voiceover||"").trim().split(/\s+/).filter(Boolean).length,0);
   return d;
 }
+function showNotes(list, err){ $("#parse-notes").innerHTML=(list||[]).map(n=>`<p class="${err?"err":""}">${esc(n)}</p>`).join(""); }
 function buildFromPaste(){
-  const msg=$("#parse-msg");
-  try{
-    const d=normalize(parseResult($("#paste").value));
-    if(!d.scenes.length) throw new Error("Found JSON, but it has no \"scenes\" list.");
-    TTS.stop(); board={raw:$("#paste").value, data:d, example:false}; ls.set("board",board);
-    msg.textContent=""; renderBoard(); toast(d.scenes.length+" scenes built");
-  }catch(e){ msg.innerHTML=`<span style="color:var(--bad)">${esc(e.message)}</span>`; }
+  const msg=$("#parse-msg"); msg.textContent="Reading…"; showNotes([]);
+  setTimeout(()=>{ // let the "Reading…" paint before a big parse
+    try{
+      const nb=makeBoard($("#paste").value, false);
+      TTS.stop(); board=nb;
+      const kept=saveBoard();
+      msg.textContent=""; showNotes(nb.notes.concat(kept?[]:["This script is too big to keep in the browser after a reload. Press Save to library to keep it in your account."]));
+      if(fullEditor) toggleFull(false);
+      renderBoard(); toast(nb.data.scenes.length+" scenes built");
+      $("#board-out").scrollIntoView({behavior:"smooth",block:"start"});
+    }catch(e){ msg.textContent=""; showNotes([e.message], true); }
+  }, 30);
 }
 $("#build").onclick=buildFromPaste;
-function loadExample(ex){ TTS.stop(); board={raw:JSON.stringify(ex,null,2), data:normalize(JSON.parse(JSON.stringify(ex))), example:true}; $("#paste").value=board.raw; ls.set("board",board); renderBoard(); }
+function loadExample(ex){ TTS.stop(); board=makeBoard(JSON.stringify(ex,null,2), true); $("#paste").value=board.raw; updateCount(); showNotes([]); saveBoard(); renderBoard(); }
 $("#load-example").onclick=()=>loadExample(EXAMPLE);
 $("#load-example-hi").onclick=()=>loadExample(EXAMPLE_HI);
-$("#clear-board").onclick=()=>{ TTS.stop(); board=null; ls.set("board",null); $("#paste").value=""; renderBoard(); };
+$("#clear-board").onclick=()=>{ TTS.stop(); board=null; saveBoard(); $("#paste").value=""; updateCount(); showNotes([]); renderBoard(); };
+
+/* ---- big paste editor ---- */
+let fullEditor=false, countRaf=0;
+function updateCount(){
+  clearTimeout(countRaf);
+  countRaf=setTimeout(()=>{
+    const v=$("#paste").value;
+    if(!v){ $("#paste-count").textContent="Empty"; return; }
+    let lines=1; for(let i=0;i<v.length;i++) if(v.charCodeAt(i)===10) lines++;
+    const kb=new Blob([v]).size/1024;
+    $("#paste-count").textContent=`${lines.toLocaleString()} lines · ${v.length.toLocaleString()} characters · ${kb>1024?(kb/1024).toFixed(1)+" MB":Math.max(1,Math.round(kb))+" KB"}`;
+  }, 120);
+}
+function toggleFull(on){
+  fullEditor = on===undefined ? !fullEditor : on;
+  $("#paste-panel").classList.toggle("full", fullEditor);
+  $("#paste-full").textContent = fullEditor ? "Exit full screen" : "Full screen";
+  $("#paste-full").setAttribute("aria-pressed", String(fullEditor));
+  document.body.style.overflow = fullEditor ? "hidden" : "";
+  if(fullEditor) $("#paste").focus();
+}
+function insertText(text, append){
+  const ta=$("#paste");
+  if(append && ta.value.trim()) ta.value = ta.value.replace(/\s+$/,"") + "\n\n" + text;
+  else ta.value = text;
+  updateCount(); ta.scrollTop = append ? ta.scrollHeight : 0;
+}
+async function fromClipboard(append){
+  try{
+    const t = await navigator.clipboard.readText();
+    if(!t || !t.trim()){ toast("Your clipboard is empty. Copy the AI's reply first."); return; }
+    insertText(t, append);
+    toast(append ? "Part added ("+t.length.toLocaleString()+" characters)" : "Pasted "+t.length.toLocaleString()+" characters");
+  }catch(e){
+    const ta=$("#paste"); ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+    toast(append ? "Click at the end of the box and press Ctrl+V (Cmd+V on Mac)" : "Click in the box and press Ctrl+V (Cmd+V on Mac)");
+  }
+}
+$("#paste").addEventListener("input", updateCount);
+$("#paste-clip").onclick=()=>fromClipboard(false);
+$("#paste-add").onclick=()=>fromClipboard(true);
+$("#paste-full").onclick=()=>toggleFull();
+$("#paste-clear").onclick=e=>{
+  const b=e.currentTarget;
+  if(!$("#paste").value) return;
+  if(b.dataset.armed){ $("#paste").value=""; updateCount(); showNotes([]); b.dataset.armed=""; b.textContent="Empty box"; return; }
+  b.dataset.armed="1"; b.textContent="Tap again to empty"; setTimeout(()=>{ b.dataset.armed=""; b.textContent="Empty box"; },3000);
+};
+$("#paste-file").onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ insertText(String(r.result||""), false); toast("Opened "+f.name); };
+  r.onerror=()=>toast("Couldn't read that file. Save it as .txt and try again.");
+  r.readAsText(f, "utf-8"); e.target.value="";
+};
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && fullEditor) toggleFull(false); });
 
 function renderBoard(){
   const out=$("#board-out");
+  if(board && !board.data){ try{ board=makeBoard(board.raw, board.example); }catch(e){ board=null; } }
   if(!board){ TTS.detach(); $("#board-title").textContent="Paste the AI's answer"; $("#paste-panel").hidden=false;
     out.innerHTML=`<div class="empty" style="margin-top:16px"><h3>No scenes yet</h3><p class="muted">Paste the JSON your AI returned, or load the example to see how a finished board looks.</p></div>`; return; }
   const d=board.data, p=d.project, rtl = /urdu \(nastaliq\)|^urdu$/i.test(p.script||"") || (p.language==="Urdu" && !/roman/i.test(p.script||""));
   $("#board-title").textContent = p.title || "Untitled script";
-  if(!$("#paste").value) $("#paste").value=board.raw||"";
+  if(!$("#paste").value){ $("#paste").value=board.raw||""; updateCount(); }
   const counts={}; d.truth_ledger.forEach(f=>{ counts[f.status]=(counts[f.status]||0)+1; });
   const unverified = (counts.needs_verification||0)+(counts.disputed||0);
   out.innerHTML = `
@@ -1732,9 +1943,9 @@ function renderLibrary(){
   const ls2=$("#lib-start"); if(ls2) ls2.onclick=()=>go("studio");
   $$("[data-open]").forEach(b=>b.onclick=()=>{ const p=projects[b.dataset.open]; if(!p) return; currentId=p.id; ls.set("currentId",p.id);
     if(p.brief){ brief=Object.assign(defaultBrief(),p.brief); } lastPrompt=p.prompt||""; ls.set("lastPrompt",lastPrompt);
-    if(p.result){ try{ board={raw:p.result,data:normalize(parseResult(p.result)),example:false}; ls.set("board",board); $("#paste").value=p.result; go("board"); return; }catch(e){} }
+    if(p.result){ try{ TTS.stop(); board=makeBoard(p.result,false); saveBoard(); $("#paste").value=p.result; updateCount(); go("board"); return; }catch(e){} }
     go("studio"); });
-  $$("[data-del]").forEach(b=>b.onclick=()=>{ if(b.dataset.armed){ delete projects[b.dataset.del]; ls.set("projects",projects); cloudDelete(b.dataset.del); if(currentId===b.dataset.del){currentId=null;ls.set("currentId",null);} renderLibrary(); toast("Deleted"); } else { b.dataset.armed="1"; b.textContent="Tap again to delete"; b.style.borderColor="var(--bad)"; b.style.color="var(--bad)"; } });
+  $$("[data-del]").forEach(b=>b.onclick=()=>{ if(b.dataset.armed){ const gone=projects[b.dataset.del]; delete projects[b.dataset.del]; ls.set("projects",projects); cloudDelete(b.dataset.del, gone&&gone.result ? Math.ceil(gone.result.length/PART)+1 : 1); if(currentId===b.dataset.del){currentId=null;ls.set("currentId",null);} renderLibrary(); toast("Deleted"); } else { b.dataset.armed="1"; b.textContent="Tap again to delete"; b.style.borderColor="var(--bad)"; b.style.color="var(--bad)"; } });
 }
 $("#pf-save").onclick=async()=>{ profile.name=$("#pf-name").value.trim()||profile.name; profile.channel=$("#pf-channel").value.trim(); const ok=await saveProfile(); paintUser(); toast(ok?"Profile saved and synced":"Profile saved"); };
 $("#pf-export").onclick=()=>download(slug(profile.name)+"_uscript_profile.json", JSON.stringify({profile, projects},null,2));
@@ -1745,7 +1956,9 @@ $("#pf-import").onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=
 /* ============ BOOT ============ */
 function boot(){
   if(profile){ paintUser(); $("#si-name").value=profile.name||""; $("#si-channel").value=profile.channel||""; $("#si-lang").value=profile.lang||"Hinglish"; }
+  if(board && !board.data){ try{ board=makeBoard(board.raw, board.example); }catch(e){ board=null; } }
   if(board) $("#paste").value=board.raw||"";
+  updateCount();
   paintAuth();
   const last=ls.get("view","studio");
   go(profile ? (last==="landing"?"studio":last) : "landing");
